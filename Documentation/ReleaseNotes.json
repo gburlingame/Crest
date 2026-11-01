@@ -4705,6 +4705,10 @@
     "thundermist-private-build": {
       "category": "internal",
       "message": "Build this fork as Thundermist with its own identity, data folder and signing, and without automatic updates."
+    },
+    "thundermist-product-name": {
+      "category": "internal",
+      "message": "Show the Thundermist name throughout the app, applied to a copy of the source at build time."
     }
   }
 }

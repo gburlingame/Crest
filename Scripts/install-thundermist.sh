@@ -4,9 +4,13 @@ set -euo pipefail
 # Builds Thundermist, a private build of Crest, signs it with this Mac's Apple
 # Development identity, and installs it in /Applications. It never touches an
 # installed official Crest. The Chromium engine is the one Crest published for
-# this checkout's engine inputs.
+# this checkout's engine inputs. It builds from a copy of the source with the
+# product name applied (Scripts/thundermist-rebrand.py), so this repository keeps
+# upstream's text and merges stay clean.
 #
-# Usage: Scripts/install-thundermist.sh [--provision-only] [--no-open]
+# Usage: Scripts/install-thundermist.sh [--provision-only] [--no-install] [--no-open]
+#   --no-install leaves the signed app in ~/Library/Caches/Thundermist and does
+#   not touch /Applications or a running Thundermist.
 
 repository_root="${0:A:h:h}"
 application_path="/Applications/Thundermist.app"
@@ -22,13 +26,18 @@ derived_data_path="${THUNDERMIST_DERIVED_DATA:-$HOME/Library/Developer/Xcode/Der
 engine_cache_root="${CREST_ENGINE_CACHE:-$HOME/Library/Caches/Crest-local-release}"
 lsregister="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"
 
+work_root="${THUNDERMIST_WORK_ROOT:-$HOME/Library/Caches/Thundermist}"
+build_source="$work_root/source"
+
 provision_only=false
+install_when_done=true
 open_when_done=true
 for argument in "$@"; do
   case "$argument" in
     --provision-only) provision_only=true ;;
+    --no-install) install_when_done=false ;;
     --no-open) open_when_done=false ;;
-    *) print -u2 "Usage: Scripts/install-thundermist.sh [--provision-only] [--no-open]"; exit 64 ;;
+    *) print -u2 "Usage: Scripts/install-thundermist.sh [--provision-only] [--no-install] [--no-open]"; exit 64 ;;
   esac
 done
 
@@ -169,6 +178,16 @@ if [[ ! -d "$engine_path" ]]; then
   mv "$download_path/extracted" "$engine_cache_root/$engine_tag"
 fi
 
+# --- Source: everything below builds from the renamed copy. ---
+print "Preparing source in $build_source..."
+mkdir -p "$build_source"
+rsync -a --delete --exclude .git --exclude 'CrestCore/**/bin/' --exclude 'CrestCore/**/obj/' \
+  "$repository_root/" "$build_source/"
+python3 "$repository_root/Scripts/thundermist-rebrand.py" "$build_source"
+cd "$build_source"
+# The contract fingerprint hashes the renamed text, so refresh the generated files.
+(cd CrestCore && "$CREST_DOTNET" run --project tools/CrestCore.Generator --nologo -- --root "$build_source" >/dev/null)
+
 # --- Native core and interface. ---
 build_number="$(date +%Y%m%d%H%M)"
 print "Building $product_name $build_number with $engine_tag..."
@@ -218,6 +237,15 @@ python3 Scripts/control-plane/package-chromium-host.py \
 
 codesign --verify --deep --strict --verbose=2 "$built_application_path"
 [[ "$(defaults read "$built_application_path/Contents/Info" CFBundleIdentifier)" == "$bundle_identifier" ]]
+
+if [[ "$install_when_done" != true ]]; then
+  kept_application_path="$work_root/Thundermist.app"
+  [[ -e "$kept_application_path" ]] && find "$kept_application_path" -depth -delete
+  ditto "$built_application_path" "$kept_application_path"
+  "$lsregister" -u "$kept_application_path" >/dev/null 2>&1 || true
+  print "Built $product_name $build_number at $kept_application_path; nothing was installed."
+  exit 0
+fi
 
 # --- Install. Only this app's own process is ever asked to quit. ---
 installed_pattern="^${application_path}/Contents/MacOS/"
