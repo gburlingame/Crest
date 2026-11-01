@@ -9,6 +9,8 @@ struct BrowserSidebarDensityFont: ViewModifier {
         let size =
             BrowserSidebarDensity.bodySize(touch: supportsTouch)
             * textSizeScale * BrowserSidebarDensity(scale).scale
-        content.font(scale == 1 ? nil : .system(size: size))
+        // A pointer sidebar's body size differs from the platform's body text, so
+        // only touch can inherit that text at the default scale.
+        content.font(supportsTouch && scale == 1 ? nil : .system(size: size))
     }
 }

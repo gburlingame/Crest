@@ -6,7 +6,7 @@ struct BrowserSidebarDensity: Equatable, Sendable {
     // MARK: - Static Variables
 
     static let scaleRange: ClosedRange<Double> = 0.7...1.4
-    private static let pointerBodySize: CGFloat = 13
+    private static let pointerBodySize: CGFloat = 14
     private static let touchBodySize: CGFloat = 17
     private static let minimumTouchTarget: CGFloat = 44
     private static let minimumPointerTarget: CGFloat = 24

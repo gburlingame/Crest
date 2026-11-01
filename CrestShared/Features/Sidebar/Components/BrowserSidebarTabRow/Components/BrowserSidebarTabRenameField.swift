@@ -21,6 +21,12 @@ struct BrowserSidebarTabRenameField: View {
         Label {
             TextField("Tab Name", text: $draftTitle)
                 .textFieldStyle(.plain)
+                #if os(macOS)
+                    .modifier(
+                        BrowserSidebarDensityFont(
+                            scale: BrowserDeviceAppearanceStore.shared.tabScale, supportsTouch: false)
+                    )
+                #endif
                 .focused(isTitleFocused)
                 .submitLabel(.done)
                 .onSubmit(commitTitle)
