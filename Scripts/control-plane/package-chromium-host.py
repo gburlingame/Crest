@@ -33,6 +33,9 @@ ENGINE_HELPER_NAME = "Chromium Helper"
 ENGINE_ALERTS_HELPER = "Chromium Helper (Alerts).app"
 # How the engine's localized InfoPlist.strings spell its product name.
 ENGINE_PRODUCT_NAMES = ("Chromium", "क्रोमियम")
+# The profile folder the engine's launcher opens under Application Support
+# (Overlay/chrome/app/crest_user_data_dir.h).
+ENGINE_PROFILE_ROOT = b"/Crest/Chromium"
 
 
 def is_macho(path):
@@ -94,6 +97,22 @@ def name_product_in_localized_info(resources, product_name):
                     value = value.replace(name, product_name)
                 values[key] = value
         strings.write_bytes(plistlib.dumps(values, fmt=plistlib.FMT_BINARY))
+
+
+def set_engine_profile_root(output, root):
+    """Give a differently named product its own engine profile, so it never
+    opens the one official Crest uses on the same Mac. The prebuilt launcher
+    holds the folder as one fixed string, so the new name must be the same
+    length. Stop rather than package if the engine ever stops matching."""
+    replacement = root.encode()
+    if len(replacement) != len(ENGINE_PROFILE_ROOT):
+        raise SystemExit(f"The engine profile root must be {len(ENGINE_PROFILE_ROOT)} bytes long")
+    with (output / "Contents/Info.plist").open("rb") as stream:
+        executable = output / "Contents/MacOS" / plistlib.load(stream)["CFBundleExecutable"]
+    data = executable.read_bytes()
+    if data.count(ENGINE_PROFILE_ROOT) != 1:
+        raise SystemExit(f"Expected one {ENGINE_PROFILE_ROOT!r} in {executable}; the engine has changed")
+    executable.write_bytes(data.replace(ENGINE_PROFILE_ROOT, replacement))
 
 
 def is_bundle_executable(path):
@@ -167,6 +186,13 @@ def main():
     parser.add_argument("--output", required=True, type=Path, help="New absolute .app path outside /Applications")
     parser.add_argument("--distribution", action="store_true",
                         help="Sign for notarization: hardened runtime, secure timestamps and the engine's helper entitlements")
+    parser.add_argument("--product-identity", default="com.pauldavis.crest",
+                        help="Bundle identifier of a --product package")
+    parser.add_argument("--product-name", default="Crest", help="Display name of a --product package")
+    parser.add_argument("--engine-profile-root",
+                        help="Replacement for the engine's /Crest/Chromium profile folder, the same length")
+    parser.add_argument("--cloud-environment", choices=["Production", "Development"],
+                        help="CloudKit environment to sign with, when the profile grants both")
     args = parser.parse_args()
     if args.signing_identity.strip() in ("", "-"):
         parser.error("Use a stable signing identity so keychain access survives rebuilds")
@@ -204,7 +230,7 @@ def main():
         if not args.product and is_product_framework:
             parser.error("Build CrestChromiumUI for a review package; this framework is the normal product composition")
     identity = (
-        "com.pauldavis.crest" if args.product
+        args.product_identity if args.product
         else "com.pauldavis.crest.chromium-baseline" if args.baseline
         else "com.pauldavis.crest.control-plane.chromium")
     product_entitlements = None
@@ -236,7 +262,7 @@ def main():
             environments = [environments]
         push = granted.get("com.apple.developer.aps-environment")
         cloud_environment = next(
-            (value for value in ("Production", "Development") if value in environments), None)
+            (value for value in (args.cloud_environment, "Production", "Development") if value in environments), None)
         if args.product:
             granted_environment = cloud_environment is not None and push in ("development", "production")
         else:
@@ -262,6 +288,8 @@ def main():
     # retaining independent files for signing. No input bundle is modified.
     output.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(["cp", "-cR", str(browser), str(output)], check=True)
+    if args.engine_profile_root:
+        set_engine_profile_root(output, args.engine_profile_root)
     frameworks = output / "Contents/Frameworks"
     if not args.baseline:
         subprocess.run(["ditto", str(ui), str(frameworks / ui.name)], check=True)
@@ -313,7 +341,7 @@ def main():
         info = plistlib.load(stream)
     info["CFBundleIdentifier"] = identity
     info["CFBundleDisplayName"] = (
-        "Crest" if args.product
+        args.product_name if args.product
         else "Crest Chromium Baseline" if args.baseline
         else "Crest Chromium Experiment")
     info["CFBundleName"] = info["CFBundleDisplayName"]

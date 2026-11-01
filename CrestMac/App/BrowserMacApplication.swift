@@ -169,9 +169,10 @@ final class BrowserMacApplication {
         systemNowPlaying?.start()
         let isolatedSoftwareUpdateFeed =
             launchEnvironment.isolatedSoftwareUpdateFeedURL
+        // Thundermist updates by rebuilding from source (Scripts/install-thundermist.sh).
+        // Sparkle stays off so an official Crest update can never replace this build.
         let softwareUpdates = BrowserSoftwareUpdateService(
-            isEnabled: presentsInstalledApplicationUI
-                && (!usesIsolatedLaunch || isolatedSoftwareUpdateFeed != nil),
+            isEnabled: false,
             preferences: usesIsolatedLaunch ? nil : .standard,
             defaultChannel: isolatedSoftwareUpdateFeed.map { _ in .development },
             feedURLOverride: isolatedSoftwareUpdateFeed
