@@ -5,8 +5,8 @@ namespace CrestCore.Domain;
 /// What a new Space starts as in each kind of workspace: its name, symbol,
 /// accent and look, what it searches and keeps, whether it offers to save
 /// passwords, and the tabs it starts with. Every new Space has a profile of
-/// its own and opens freely. An ordinary Space takes the next accent in turn
-/// and wears that accent's house look; a private one wears the private look
+/// its own and opens freely. An ordinary Space takes the next accent and the
+/// next gradient scheme in turn; a private one wears the private look
 /// and never offers to save or sync passwords. Both start with one Start Page
 /// tab. The Getting Started practice starts from its own Space, holding the
 /// practice tabs, and a first launch from the Personal Space.
@@ -41,7 +41,7 @@ public sealed class SpaceTemplate {
 
     public static readonly SpaceTemplate Ordinary = new(isPrivate: false, name: number => $"Space {number}",
         symbol: "square.grid.2x2.fill", accent: number => SpaceAccent.All[(number - 1) % SpaceAccent.All.Count],
-        look: accent => accent.House, browsing: OrdinaryBrowsing, credentials: SavesPasswords, tabs: StartPage);
+        look: number => SpaceScheme.InTurn(number).Look, browsing: OrdinaryBrowsing, credentials: SavesPasswords, tabs: StartPage);
 
     public static readonly SpaceTemplate Private = new(isPrivate: true, name: number => number == 1 ? "Private" : $"Private {number}",
         symbol: "eyeglasses", accent: _ => SpaceAccent.Indigo, look: _ => PrivateLook,
@@ -57,14 +57,14 @@ public sealed class SpaceTemplate {
     /// practice tab in its order. It never offers to save passwords, and no
     /// new Space comes from it.
     public static readonly SpaceTemplate Practice = new(isPrivate: false, name: _ => "Practice", symbol: "leaf.fill",
-        accent: _ => SpaceAccent.Indigo, look: accent => accent.House, browsing: OrdinaryBrowsing, credentials: NoPasswords,
+        accent: _ => SpaceAccent.Indigo, look: _ => SpaceScheme.Thundermist.Look, browsing: OrdinaryBrowsing, credentials: NoPasswords,
         tabs: (tabIds, now) => [.. PracticeTab.All.Select(tab => tab.Opened(tabIds(), now))]);
 
     /// The one Space a first launch starts with when nothing is carried to it:
-    /// Personal, wearing the Winter house look, with one Start Page tab. No
+    /// Personal, wearing the Thundermist gradient, with one Start Page tab. No
     /// new Space comes from it.
     public static readonly SpaceTemplate FirstInstall = new(isPrivate: false, name: _ => "Personal", symbol: "person.fill",
-        accent: _ => SpaceAccent.Indigo, look: accent => accent.House, browsing: OrdinaryBrowsing, credentials: SavesPasswords,
+        accent: _ => SpaceAccent.Indigo, look: _ => SpaceScheme.Thundermist.Look, browsing: OrdinaryBrowsing, credentials: SavesPasswords,
         tabs: StartPage);
 
     #endregion
@@ -80,7 +80,7 @@ public sealed class SpaceTemplate {
     private readonly Func<int, string> name;
     private readonly string symbol;
     private readonly Func<int, SpaceAccent> accent;
-    private readonly Func<SpaceAccent, SpaceBranding> look;
+    private readonly Func<int, SpaceBranding> look;
     private readonly BrowsingPreferences browsing;
     private readonly CredentialPreferences credentials;
     /// The tabs a new Space starts with, given a source of tab identities and
@@ -92,7 +92,7 @@ public sealed class SpaceTemplate {
     #region Constructors
 
     private SpaceTemplate(bool isPrivate, Func<int, string> name, string symbol, Func<int, SpaceAccent> accent,
-        Func<SpaceAccent, SpaceBranding> look, BrowsingPreferences browsing, CredentialPreferences credentials,
+        Func<int, SpaceBranding> look, BrowsingPreferences browsing, CredentialPreferences credentials,
         Func<Func<Guid>, DateTimeOffset, IReadOnlyList<TabState>> tabs) {
         IsPrivate = isPrivate;
         this.name = name;
@@ -122,7 +122,7 @@ public sealed class SpaceTemplate {
         ArgumentNullException.ThrowIfNull(tabIds);
         ArgumentOutOfRangeException.ThrowIfLessThan(number, 1);
         var shade = accent(number);
-        var settings = new SpaceSettings(name(number), symbol, shade, look(shade), browsing, credentials, SpaceAccessPolicy.Open,
+        var settings = new SpaceSettings(name(number), symbol, shade, look(number), browsing, credentials, SpaceAccessPolicy.Open,
             IsSavedTabsExpanded: true, SavedTabsExpansionModifiedAt: null);
         return new(spaceId, profileId, settings, Folders: [], Tabs: tabs(tabIds, now), SplitGroups: [], ArchivedTabs: [], History: []);
     }

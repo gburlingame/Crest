@@ -89,7 +89,6 @@ struct BrowserSettingsSpacePage: View {
                     Divider()
                     Button("Reset Appearance", systemImage: "arrow.counterclockwise") { resetAppearance() }
                         .disabled(startingAppearance == nil || startingAppearance == space.settings.look)
-                    Button("Artwork Credits", systemImage: "info.circle") { showsArtworkCredits = true }
                 }
                 .crestMenuActionLabelStyle()
             } label: {
@@ -220,7 +219,7 @@ struct BrowserSettingsSpaceMenu: View {
     var body: some View {
         let order = BrowserSpaceOrderActions(browser: browser, spaceID: space.id)
         Button("Rename", systemImage: "pencil") { openSpace(space.id, intent: .rename) }
-        Button("Edit Crest…", systemImage: "paintpalette") { openSpace(space.id, tab: .appearance) }
+        Button("Edit Look…", systemImage: "paintpalette") { openSpace(space.id, tab: .appearance) }
         Divider()
         Button("Move Up", systemImage: "arrow.up", action: order.moveUp).disabled(!order.canMoveUp)
         Button("Move Down", systemImage: "arrow.down", action: order.moveDown).disabled(!order.canMoveDown)

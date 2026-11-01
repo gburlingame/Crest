@@ -22103,8 +22103,938 @@ struct SpaceScheme: Hashable, Sendable {
             hasCustomAppearance: false
         )
     )
+    static let thundermist = SpaceScheme(
+        tag: 1,
+        name: "thundermist",
+        title: LocalizedStringResource("Thundermist"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.169, green: 0.227, blue: 0.333, alpha: 1),
+                    BrandColor(red: 0.402, green: 0.466, blue: 0.536, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let midnight = SpaceScheme(
+        tag: 2,
+        name: "midnight",
+        title: LocalizedStringResource("Midnight"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.078, green: 0.118, blue: 0.188, alpha: 1),
+                    BrandColor(red: 0.208, green: 0.341, blue: 0.49, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let ocean = SpaceScheme(
+        tag: 3,
+        name: "ocean",
+        title: LocalizedStringResource("Ocean"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.059, green: 0.204, blue: 0.376, alpha: 1),
+                    BrandColor(red: 0.126, green: 0.499, blue: 0.589, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let aurora = SpaceScheme(
+        tag: 4,
+        name: "aurora",
+        title: LocalizedStringResource("Aurora"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.043, green: 0.239, blue: 0.298, alpha: 1),
+                    BrandColor(red: 0.17, green: 0.514, blue: 0.403, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let forest = SpaceScheme(
+        tag: 5,
+        name: "forest",
+        title: LocalizedStringResource("Forest"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.075, green: 0.306, blue: 0.29, alpha: 1),
+                    BrandColor(red: 0.287, green: 0.504, blue: 0.359, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let dusk = SpaceScheme(
+        tag: 6,
+        name: "dusk",
+        title: LocalizedStringResource("Dusk"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.227, green: 0.11, blue: 0.443, alpha: 1),
+                    BrandColor(red: 0.7, green: 0.355, blue: 0.387, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let plum = SpaceScheme(
+        tag: 7,
+        name: "plum",
+        title: LocalizedStringResource("Plum"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.176, green: 0.106, blue: 0.306, alpha: 1),
+                    BrandColor(red: 0.557, green: 0.271, blue: 0.522, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let ember = SpaceScheme(
+        tag: 8,
+        name: "ember",
+        title: LocalizedStringResource("Ember"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.478, green: 0.122, blue: 0.169, alpha: 1),
+                    BrandColor(red: 0.677, green: 0.385, blue: 0.175, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let graphite = SpaceScheme(
+        tag: 9,
+        name: "graphite",
+        title: LocalizedStringResource("Graphite"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.169, green: 0.18, blue: 0.2, alpha: 1),
+                    BrandColor(red: 0.353, green: 0.376, blue: 0.408, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let sunrise = SpaceScheme(
+        tag: 10,
+        name: "sunrise",
+        title: LocalizedStringResource("Sunrise"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.965, green: 0.651, blue: 0.486, alpha: 1),
+                    BrandColor(red: 0.969, green: 0.851, blue: 0.659, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let peach = SpaceScheme(
+        tag: 11,
+        name: "peach",
+        title: LocalizedStringResource("Peach"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 1, green: 0.604, blue: 0.545, alpha: 1),
+                    BrandColor(red: 1, green: 0.827, blue: 0.647, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let rose = SpaceScheme(
+        tag: 12,
+        name: "rose",
+        title: LocalizedStringResource("Rose"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.949, green: 0.651, blue: 0.702, alpha: 1),
+                    BrandColor(red: 0.973, green: 0.851, blue: 0.769, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let lavender = SpaceScheme(
+        tag: 13,
+        name: "lavender",
+        title: LocalizedStringResource("Lavender"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.722, green: 0.663, blue: 0.91, alpha: 1),
+                    BrandColor(red: 0.902, green: 0.843, blue: 0.961, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let sky = SpaceScheme(
+        tag: 14,
+        name: "sky",
+        title: LocalizedStringResource("Sky"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.557, green: 0.773, blue: 0.988, alpha: 1),
+                    BrandColor(red: 0.878, green: 0.765, blue: 0.988, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let seafoam = SpaceScheme(
+        tag: 15,
+        name: "seafoam",
+        title: LocalizedStringResource("Seafoam"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.659, green: 0.902, blue: 0.812, alpha: 1),
+                    BrandColor(red: 0.863, green: 0.929, blue: 0.757, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
+    static let sand = SpaceScheme(
+        tag: 16,
+        name: "sand",
+        title: LocalizedStringResource("Sand"),
+        look: SpaceBranding(
+            colors: ColorPalette(
+                colors: [
+                    BrandColor(red: 0.851, green: 0.769, blue: 0.627, alpha: 1),
+                    BrandColor(red: 0.937, green: 0.89, blue: 0.808, alpha: 1)
+                ]
+            ),
+            bannerPattern: SpaceBannerPattern.diagonal,
+            bannerStrength: 1,
+            readabilityFade: 0,
+            keepsControlsReadable: false,
+            themeMode: SpaceThemeMode.gradient,
+            gradientAngle: 90,
+            showsTexture: false,
+            iconStyle: SpaceIconStyle.simpleSymbol,
+            symbolColor: nil,
+            crest: SpaceCrest(
+                backplate: CrestBackplate.shield,
+                fieldDivision: CrestFieldDivision.plain,
+                ordinary: CrestOrdinary.none,
+                trim: CrestTrim.none,
+                symbol: CrestSymbol.mountain,
+                chargeLayout: CrestChargeLayout.single,
+                backplateColorIndex: 1,
+                secondaryFieldColorIndex: 1,
+                ordinaryColorIndex: 2,
+                trimColorIndex: 1,
+                symbolColorIndex: 2,
+                startingPresetID: nil,
+                edgeColorIndex: 1,
+                palette: nil,
+                charge: nil,
+                plateScale: 1,
+                edgeWidth: 0,
+                divisionCount: 4,
+                finish: CrestFinish.flat,
+                ordinaryWidth: 1,
+                trimWeight: 1,
+                trimDetail: 12,
+                chargeScale: 1,
+                chargeOffset: 0,
+                chargeWeight: CrestChargeWeight.bold,
+                sheenAngle: 45,
+                sealTeeth: 12,
+                showsOutline: false,
+                depth: CrestDepth.none
+            ),
+            renderingVersion: 2,
+            folderColorIntensity: 0,
+            textColorMode: SpaceTextColorMode.automatic,
+            hasCustomAppearance: false
+        )
+    )
 
-    static let all: [SpaceScheme] = [neutral]
+    static let all: [SpaceScheme] = [
+        neutral,
+        thundermist,
+        midnight,
+        ocean,
+        aurora,
+        forest,
+        dusk,
+        plum,
+        ember,
+        graphite,
+        sunrise,
+        peach,
+        rose,
+        lavender,
+        sky,
+        seafoam,
+        sand
+    ]
 
     static func named(_ name: String?) -> SpaceScheme? {
         all.first { $0.name == name }

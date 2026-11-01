@@ -4,14 +4,20 @@ import XCTest
 
 @MainActor
 final class BrowserSoftwareUpdateTests: XCTestCase {
-    func testApplicationRequiresSignedSparkleUpdatesFromTheOfficialFeed() throws {
+    /// Thundermist updates by rebuilding from source, so an official Crest
+    /// update must never be able to replace it.
+    func testApplicationNeverFetchesOrInstallsOfficialUpdates() throws {
         XCTAssertEqual(
             Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") as? String,
-            "https://raw.githubusercontent.com/pauljoda/Crest/updates/appcast.xml"
+            "https://raw.githubusercontent.com/gburlingame/Crest/updates/appcast.xml"
         )
         XCTAssertEqual(
-            Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
-            "x/dBoNAjtYIa+JKUUHY48NYepidnElHTo3w2VMyqzLA="
+            Bundle.main.object(forInfoDictionaryKey: "SUEnableAutomaticChecks") as? Bool,
+            false
+        )
+        XCTAssertEqual(
+            Bundle.main.object(forInfoDictionaryKey: "SUAutomaticallyUpdate") as? Bool,
+            false
         )
         XCTAssertEqual(
             Bundle.main.object(forInfoDictionaryKey: "SURequireSignedFeed") as? Bool,
@@ -19,19 +25,6 @@ final class BrowserSoftwareUpdateTests: XCTestCase {
         )
         XCTAssertEqual(
             Bundle.main.object(forInfoDictionaryKey: "SUVerifyUpdateBeforeExtraction") as? Bool,
-            true
-        )
-        XCTAssertEqual(
-            Bundle.main.object(forInfoDictionaryKey: "SUEnableAutomaticChecks") as? Bool,
-            true
-        )
-        XCTAssertEqual(
-            Bundle.main.object(forInfoDictionaryKey: "SUScheduledCheckInterval")
-                as? Double,
-            BrowserSoftwareUpdateRefreshCoordinator.minimumAutomaticCheckInterval
-        )
-        XCTAssertEqual(
-            Bundle.main.object(forInfoDictionaryKey: "SUAutomaticallyUpdate") as? Bool,
             true
         )
         // The packaged default follows the branch (Experimental on a branch

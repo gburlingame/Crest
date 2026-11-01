@@ -22,8 +22,7 @@ public sealed class SetupLook {
     /// A Space wears a gradient of its colors, from top to bottom, and a
     /// plain icon.
     public static readonly SetupLook Modern = new(Kinds.Modern, name: "modern", title: "Modern",
-        newSpaceLook: accent => SpaceBranding.Painted(accent.LegacyColors, SpaceBannerPattern.Diagonal, strength: 1,
-            SpaceBranding.LegacyReadabilityFade, SpaceThemeMode.Gradient, ModernGradientAngle, showsTexture: false),
+        newSpaceLook: accent => SpaceScheme.InTurn(SpaceAccent.All.ToList().IndexOf(accent) + 1).Look,
         applying: branding => branding with {
             ThemeMode = SpaceThemeMode.Gradient,
             GradientAngle = ModernGradientAngle,

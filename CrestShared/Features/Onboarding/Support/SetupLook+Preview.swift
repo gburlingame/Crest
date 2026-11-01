@@ -1,21 +1,21 @@
 import SwiftUI
 
-/// What a look shows of itself before any Space wears it: a template's look
-/// in the look's own sidebar mode and icon style, as the core gives them to
-/// the Spaces setup makes.
+/// What a look shows of itself before any Space wears it: the Thundermist
+/// gradient in the look's own sidebar mode and icon style, as the core gives
+/// them to the Spaces setup makes.
 extension SetupLook {
     // MARK: - Static Variables
 
-    /// The template every look's preview starts from.
-    private static let previewHouse = SpaceHouse.winter
+    /// The look every preview starts from.
+    private static let previewLook = SpaceScheme.thundermist.look
 
     /// The angle a modern gradient runs at: straight down the sidebar.
     private static let modernGradientAngle = 90.0
 
     // MARK: - Variables
 
-    /// The look on the template every preview starts from.
-    var previewBranding: SpaceBranding { applying(to: Self.previewHouse.look) }
+    /// This look on the one every preview starts from.
+    var previewBranding: SpaceBranding { applying(to: Self.previewLook) }
 
     /// The symbol a previewed Space wears, which an icon shows and a crest
     /// keeps for the places too small for it.

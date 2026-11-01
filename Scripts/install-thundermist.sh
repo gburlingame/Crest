@@ -187,6 +187,8 @@ python3 "$repository_root/Scripts/thundermist-rebrand.py" "$build_source"
 cd "$build_source"
 # The contract fingerprint hashes the renamed text, so refresh the generated files.
 (cd CrestCore && "$CREST_DOTNET" run --project tools/CrestCore.Generator --nologo -- --root "$build_source" >/dev/null)
+# Generate the project here too, so new files need no change to the tracked one.
+xcodegen generate --quiet
 
 # --- Native core and interface. ---
 build_number="$(date +%Y%m%d%H%M)"

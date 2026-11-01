@@ -13,7 +13,7 @@ public sealed class DevicePlatform {
     /// browsers installed on it. First-run setup opens in a window of its own
     /// before any browser window. Agents the person runs on the Mac may use it.
     public static readonly DevicePlatform Desktop = new(name: "desktop", warningReleaseLimit: _ => 1,
-        criticalReleaseLimit: eligible => Math.Max(1, (eligible + 1) / 2), keepsSetupDraft: false, choosesLook: true,
+        criticalReleaseLimit: eligible => Math.Max(1, (eligible + 1) / 2), keepsSetupDraft: false, choosesLook: false,
         importsBrowsers: true,
         sharesPagesAcrossWindows: true,
         forcesSetup: environment => environment.ForcesOnboardingWelcome || environment.ForcesDesktopSetup,

@@ -78,7 +78,7 @@ struct BrowserOnboardingWindowContent: View {
     private var stageBranding: SpaceBranding {
         switch flow.step.kind {
         case .welcome:
-            return SpaceHouse.all[welcomeHouse % SpaceHouse.all.count].look
+            return SpaceScheme.gradients[welcomeHouse % SpaceScheme.gradients.count].look
         case .manualSetup:
             return flow.manualSetup.space(selectedManualSpaceID)?.customization.branding ?? flow.look.previewBranding
         case .review:

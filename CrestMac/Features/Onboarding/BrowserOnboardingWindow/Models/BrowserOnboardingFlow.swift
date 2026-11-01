@@ -59,7 +59,7 @@ final class BrowserOnboardingFlow {
     var step: SetupStep { state?.step ?? request.entryPoint.firstStep }
     /// The look the Spaces setup makes wear, which the stage and every
     /// preview follow.
-    var look: SetupLook { state?.look ?? .heraldic }
+    var look: SetupLook { state?.look ?? .modern }
     var failure: SetupFailure? { state?.failure }
     var review: SetupImportReview? { state?.review }
     var selectedImportApplications: Set<ImportSource> { Set(state?.selected ?? []) }

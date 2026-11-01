@@ -31,9 +31,15 @@ struct BrowserOnboardingWelcomePage: View {
                     .padding(.leading, 80)
                 Spacer(minLength: 60)
                 BrowserOnboardingWindowPreview(
-                    branding: SpaceHouse.winter.look, symbol: "house.fill", name: String(localized: "Personal")
+                    branding: SpaceScheme.thundermist.look, symbol: "house.fill", name: String(localized: "Personal")
                 ) {
-                    BrowserSpaceCrestIcon(branding: SpaceHouse.winter.look, size: 160)
+                    Image(systemName: "house.fill")
+                        .font(.system(size: 96, weight: .semibold))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: SpaceScheme.thundermist.look.colors.map(\.color),
+                                startPoint: .top, endPoint: .bottom)
+                        )
                         .frame(width: 160, height: 160)
                 }
                 .frame(width: 680, height: 460)

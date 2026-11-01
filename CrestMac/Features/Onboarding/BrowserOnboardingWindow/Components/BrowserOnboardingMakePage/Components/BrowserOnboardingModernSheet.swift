@@ -1,28 +1,15 @@
 import SwiftUI
 
-/// What a first run changes on a modern Space: its colors, whether they run
-/// as a gradient or stand solid, and its icon.
+/// What a first run changes on a Space: its gradient and its icon.
 struct BrowserOnboardingModernSheet: View {
     @Binding var branding: SpaceBranding
     @Binding var symbol: String
-    @State private var choosesEmoji = false
-
-    /// The color sets a modern Space may wear: the accents' own, each
-    /// scheme's, then each template's sidebar colors.
-    private var presets: [[BrandColor]] {
-        SpaceAccent.all.map(\.legacyColors) + SpaceScheme.all.map { Array($0.look.colors) }
-            + SpaceHouse.all.map { Array($0.look.colors) }
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 30) {
             colors
-            fill
             icon
             Spacer(minLength: 0)
-            Text("Patterns and crests: Settings › Spaces.")
-                .font(CrestTypography.sans(12, weight: .medium))
-                .foregroundStyle(CrestBrandTheme.textDisplay.opacity(0.5))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
@@ -33,94 +20,26 @@ struct BrowserOnboardingModernSheet: View {
         BrowserOnboardingMakeSection("Color") {
             VStack(alignment: .leading, spacing: 16) {
                 BrowserOnboardingMakeStrip {
-                    ForEach(Array(presets.enumerated()), id: \.offset) { _, preset in
+                    ForEach(SpaceScheme.gradients, id: \.self) { scheme in
                         BrowserOnboardingModernPresetSwatch(
-                            colors: preset, isSelected: Array(branding.colors) == preset
+                            colors: Array(scheme.look.colors), isSelected: scheme.isWorn(by: branding)
                         ) {
-                            $branding.editorUpdate {
-                                $0.colors = ColorPalette(colors: preset)
-                                $0.hasCustomAppearance = true
-                            }
+                            branding = scheme.applying(to: branding)
                         }
                     }
                 }
-                BrowserOnboardingMakeStrip(spacing: 0) {
-                    BrowserOnboardingSidebarSwatches(branding: $branding)
+                HStack(spacing: 20) {
+                    BrowserSpaceLookColorPickers(branding: $branding)
                 }
+                .fixedSize()
             }
-        }
-    }
-
-    private var fill: some View {
-        BrowserOnboardingMakeSection("Fill") {
-            Picker("Fill", selection: isGradient) {
-                Text("Gradient").tag(true)
-                Text("Solid").tag(false)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .controlSize(.small)
-            .fixedSize()
         }
     }
 
     private var icon: some View {
         BrowserOnboardingMakeSection("Icon") {
-            HStack(spacing: 12) {
-                BrowserSystemSymbolPicker(
-                    selection: Binding(
-                        get: { BrowserIconSymbol.emoji(from: symbol) == nil ? symbol : "" },
-                        set: { wearIcon($0) }))
-                BrowserArtworkPickerButton(
-                    title: "Emoji",
-                    detail: BrowserIconSymbol.emoji(from: symbol) == nil
-                        ? Text("Choose an emoji") : Text("Change emoji")
-                ) {
-                    choosesEmoji = true
-                } artwork: {
-                    if let emoji = BrowserIconSymbol.emoji(from: symbol) {
-                        Text(emoji)
-                    } else {
-                        Image(systemName: "face.smiling")
-                    }
-                }
-                .accessibilityLabel("Choose Emoji")
-                .browserIconCustomizationPopover(
-                    .init(
-                        isPresented: $choosesEmoji, title: "Space Icon",
-                        currentEmoji: BrowserIconSymbol.emoji(from: symbol),
-                        setEmoji: { wearIcon(BrowserIconSymbol.symbol(forEmoji: $0)) }))
-            }
-            .frame(maxWidth: 520)
+            BrowserSpaceLookIconPicker(branding: $branding, symbol: $symbol)
         }
-    }
-
-    /// Gives the Space `symbol` as a plain icon, which a Space that came with
-    /// a crest then shows in its place.
-    private func wearIcon(_ symbol: String) {
-        self.symbol = symbol
-        if branding.iconStyle != .simpleSymbol {
-            $branding.editorUpdate {
-                $0.iconStyle = .simpleSymbol
-                $0.hasCustomAppearance = true
-            }
-        }
-    }
-
-    // MARK: - Choices
-
-    /// Whether the sidebar runs its colors as a gradient; otherwise it stands
-    /// solid in its background color.
-    private var isGradient: Binding<Bool> {
-        Binding(
-            get: { branding.themeMode == .gradient },
-            set: { gradient in
-                $branding.editorUpdate {
-                    $0.themeMode = gradient ? .gradient : .banner
-                    if !gradient { $0.bannerPattern = .solid }
-                    $0.hasCustomAppearance = true
-                }
-            })
     }
 }
 
