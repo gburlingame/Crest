@@ -38,10 +38,6 @@
                 return
             }
             guard shell == nil else { return }
-            // The Dock plug-in runs outside the browser process, including after
-            // quit. App artwork uses the isolated app's domain, not an
-            // environment-only browsing profile name that the Dock cannot find.
-            BrowserMacDockTile.shared.defaults = .standard
             engineHost = host
             let shell = BrowserMacShell(engineHost: ChromiumShellHost(host: host))
             self.shell = shell
@@ -79,7 +75,6 @@
 
         static func startNative() {
             guard shell == nil else { return }
-            BrowserMacDockTile.shared.defaults = .standard
             let runtime = ChromiumRuntime()
             self.runtime = runtime
             let shell = BrowserMacShell(engineHost: ChromiumRuntimeShell())

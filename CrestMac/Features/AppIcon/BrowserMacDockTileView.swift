@@ -1,8 +1,7 @@
 import AppKit
 
-/// What Crest draws in its Dock tile: its app icon, and below it, how far the
-/// downloads in progress are. Both the running app and the Dock tile plug-in,
-/// which draws the tile while the app is not running, draw it this way.
+/// What Crest draws in its Dock tile while downloads are in progress: its app
+/// icon, and below it, how far along they are.
 final class BrowserMacDockTileView: NSView {
     // MARK: - Variables
 

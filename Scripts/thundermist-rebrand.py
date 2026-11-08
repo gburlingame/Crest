@@ -16,8 +16,7 @@ import sys
 
 OLD = "Crest"
 NEW = "Thundermist"
-CODE_ROOTS = ("CrestShared", "CrestMac", "CrestAgents", "CrestAgentHelper", "CrestDockTilePlugin", "CrestCore/src",
-              "CrestEngines")
+CODE_ROOTS = ("CrestShared", "CrestMac", "CrestAgents", "CrestAgentHelper", "CrestCore/src", "CrestEngines")
 CATALOG = "CrestShared/Resources/Localizable.xcstrings"
 RELEASE_NOTES = "Documentation/ReleaseNotes.json"
 

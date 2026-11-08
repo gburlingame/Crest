@@ -5221,6 +5221,10 @@
     "new-tab-single-field": {
       "category": "improved",
       "message": "New Tab is a single field: press Return to open the address you typed, or search with your default engine, in a new tab."
+    },
+    "thundermist-waterfall-icon": {
+      "category": "improved",
+      "message": "Thundermist has its own waterfall app icon, at golden hour in light mode and just after sunset in dark mode, in place of the choice of Crest icons."
     }
   }
 }

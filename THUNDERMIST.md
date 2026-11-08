@@ -137,6 +137,42 @@ breaks it fails the update script's core tests.
   `CrestMac/Features/Browser/BrowserRootView/Components/CommandPalette/BrowserNewTabBar.swift`,
   `CrestMac/Features/Browser/BrowserRootView/Models/BrowserRootModel+NewTabBar.swift`
 
+### A waterfall app icon
+
+Thundermist's icon is a waterfall seen close up: land and trees along a river
+above the lip, a wide curtain of water over the cliffs, and mist rising where
+it lands. It shows golden hour in light mode and the afterglow just after
+sunset in dark mode; macOS draws its Clear and Tinted styles from the same
+layers. `Scripts/thundermist-icon.py` writes `Thundermist/Thundermist.icon`
+from the colors and positions at its top, so a change to the icon is a change
+there followed by running the script. The install script puts the icon in
+place of Crest's in its build copy, under Crest's name, so builds straight
+from the repository still show Crest's icon.
+
+- Upstream files edited: none
+- Files added: `Scripts/thundermist-icon.py`, `Thundermist/Thundermist.icon`
+
+### No alternate app icons on Mac
+
+Settings no longer offers Crest's nine palette icons, so Thundermist always
+shows its own. The Dock tile plug-in, which drew a chosen palette icon while
+the app wasn't running, is gone; the Dock tile still shows the count and
+progress of downloads. iPhone and iPad keep Crest's palette icons.
+
+- Upstream files edited: `project.yml` (the Mac targets leave out the palette
+  icons, their previews and the plug-in), `CrestMac/Configuration/Crest-Info.plist`,
+  `Scripts/control-plane/package-chromium-host.py`,
+  `CrestMac/App/Shell/BrowserMacDockTile.swift`,
+  `CrestMac/Features/AppIcon/BrowserMacAppIconAssets.swift`,
+  `CrestMac/Features/AppIcon/BrowserMacDockTileView.swift` (a comment),
+  `CrestMac/Features/Settings/BrowserPlatformLookAndFeelResetSection.swift`,
+  `CrestMac/Features/Settings/Components/BrowserPlatformCurrentAppIcon.swift`,
+  `CrestShared/Features/Settings/BrowserLookAndFeelSettingsPane.swift`,
+  `CrestEngines/Chromium/Apple/ChromiumComposition.swift` (not an engine
+  input; the engine key is unchanged)
+- Files deleted: `CrestDockTilePlugin/CrestDockTilePlugin.swift`,
+  `CrestMac/Features/Settings/BrowserPlatformAppIconSettingsSection.swift`
+
 ## No longer different
 
 - **Readable password prompts.** The fork made password prompts opaque and

@@ -184,6 +184,10 @@ mkdir -p "$build_source"
 rsync -a --delete --exclude .git --exclude 'CrestCore/**/bin/' --exclude 'CrestCore/**/obj/' \
   "$repository_root/" "$build_source/"
 python3 "$repository_root/Scripts/thundermist-rebrand.py" "$build_source"
+# Thundermist's waterfall icon takes the place of Crest's, keeping Crest's name
+# so every target and the packager find it as before.
+rm -rf "$build_source/CrestShared/Resources/CrestIcon/Crest.icon"
+ditto "$repository_root/Thundermist/Thundermist.icon" "$build_source/CrestShared/Resources/CrestIcon/Crest.icon"
 cd "$build_source"
 # The contract fingerprint hashes the renamed text, so refresh the generated files.
 (cd CrestCore && "$CREST_DOTNET" run --project tools/CrestCore.Generator --nologo -- --root "$build_source" >/dev/null)

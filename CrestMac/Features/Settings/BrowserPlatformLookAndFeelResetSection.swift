@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The desktop's Reset All: the shared choices, plus Space page motion and the
-/// Dock icon.
+/// The desktop's Reset All: the shared choices, plus Space page motion and how
+/// the sidebar reveals itself.
 struct BrowserPlatformLookAndFeelResetSection: View {
     @AppStorage(SpacePageMotionPreference.key)
     private var animatesSpacePages = SpacePageMotionPreference.defaultValue
@@ -13,7 +13,6 @@ struct BrowserPlatformLookAndFeelResetSection: View {
             animatesSpacePages = SpacePageMotionPreference.defaultValue
             BrowserDeviceAppearanceStore.shared.sidebarRevealWidth = SidebarRevealWidthPreference.defaultValue
             revealsSidebarInFullscreen = SidebarFullscreenRevealPreference.defaultValue
-            _ = BrowserMacDockTile.shared.select("")
         }
     }
 }

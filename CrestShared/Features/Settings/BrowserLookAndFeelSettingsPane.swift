@@ -53,7 +53,10 @@ struct BrowserLookAndFeelSettingsPane: View {
             if usesLiveSidebar {
                 BrowserDefaultPageZoomSettingsSection(preferences: .shared, space: space, showsPreview: false)
             }
-            BrowserPlatformAppIconSettingsSection()
+            #if os(iOS)
+                // Thundermist on Mac has one icon; Crest's palette icons stay on iPhone and iPad.
+                BrowserPlatformAppIconSettingsSection()
+            #endif
             BrowserPlatformLookAndFeelResetSection()
         }
     }

@@ -308,12 +308,8 @@ def main():
             parser.error("The native UI build must supply Sparkle.framework beside the host framework")
         subprocess.run(["ditto", str(sparkle), str(frameworks / "Sparkle.framework")], check=True)
         icon = resources / "Crest.icns"
-        dock_plugin = ui.parent / "CrestDockTilePlugin.docktileplugin"
-        if not icon.is_file() or not dock_plugin.is_dir():
-            parser.error("The native UI build must supply Crest.icns and CrestDockTilePlugin.docktileplugin")
-        plugins = output / "Contents/PlugIns"
-        plugins.mkdir(exist_ok=True)
-        subprocess.run(["ditto", str(dock_plugin), str(plugins / dock_plugin.name)], check=True)
+        if not icon.is_file():
+            parser.error("The native UI build must supply Crest.icns")
         # The helper agents run, crest-browser, which reaches Crest over its
         # agent socket. It lives in Contents/Helpers, where signing treats it
         # as loose code with the hardened runtime; its embedded Info.plist
@@ -354,8 +350,6 @@ def main():
         info["LSMinimumSystemVersion"] = minimum_system_version(info, ui_info)
         info["CFBundleIconFile"] = "Crest"
         info["CFBundleIconName"] = "Crest"
-        info["NSDockTilePlugIn"] = "CrestDockTilePlugin.docktileplugin"
-        info["CrestAppIconPreferenceDomain"] = info["CFBundleIdentifier"]
         # Chromium's scripting dictionary names Chromium's application class,
         # which Crest's application is not. Once any script loaded it, a quit
         # Apple Event (the updater's relaunch, the Dock's Quit, a logout) found
@@ -394,7 +388,6 @@ def main():
         name_engine_helpers(frameworks, info["CFBundleDisplayName"])
         name_product_in_localized_info(resources, info["CFBundleDisplayName"])
     targets = [] if args.baseline else [frameworks / "CrestCore.Native.dylib", frameworks / ui.name,
-                                      output / "Contents/PlugIns/CrestDockTilePlugin.docktileplugin",
                                       output / "Contents/Helpers/crest-browser"]
     targets += sorted((p for p in frameworks.rglob("*.app") if not p.is_symlink()), key=lambda p: len(p.parts), reverse=True)
     targets += sorted((p for p in frameworks.glob("*.framework") if p.name != ui.name), key=lambda p: len(p.parts), reverse=True)
