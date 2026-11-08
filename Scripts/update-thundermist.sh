@@ -6,7 +6,8 @@ set -euo pipefail
 # because it has no automatic updates.
 #
 # It resolves the conflicts every merge of this fork can hit on its own: the
-# version, the release notes and the generated contract files. Any other conflict
+# version, the release notes, the generated contract files and the Xcode project,
+# which it regenerates so it lists the fork's files too. Any other conflict
 # cancels the merge and leaves the branch as it was.
 #
 # Usage: Scripts/update-thundermist.sh [--no-install] [--no-open]
@@ -41,6 +42,10 @@ if [[ ! -x "$CREST_DOTNET" ]]; then
   print -u2 "Run Scripts/control-plane/install-dotnet.sh for the SDK in CrestCore/global.json."
   exit 1
 fi
+if ! command -v xcodegen >/dev/null 2>&1; then
+  print -u2 "Install XcodeGen first (brew install xcodegen)."
+  exit 1
+fi
 
 git fetch --quiet upstream
 behind="$(git rev-list --count "HEAD..$upstream_ref")"
@@ -72,6 +77,7 @@ def version(text):
     return tuple(int(part) for part in re.search(r"MARKETING_VERSION\s*=\s*([0-9.]+)", text).group(1).split("."))
 
 generated = {
+    "Crest.xcodeproj/project.pbxproj",
     "CrestContracts/include/crest_contracts.h",
     "CrestContracts/include/crest_engine_contract.h",
     "CrestCore/src/CrestCore.Native/Generated/ContractCodec.g.cs",
@@ -111,6 +117,9 @@ PYTHON
   # The contract fingerprint hashes the source, so refresh it after any merge.
   (cd CrestCore && "$CREST_DOTNET" run --project tools/CrestCore.Generator --nologo -- --root "$repository_root" >/dev/null)
   git add -- CrestContracts/include CrestCore/src/CrestCore.Native/Generated CrestShared/Infrastructure/Core/Generated
+  # Upstream's project lacks the fork's own files, so build it from project.yml.
+  xcodegen generate --quiet
+  git add -- Crest.xcodeproj
   Scripts/check-version.sh --static >/dev/null
 
   # The engine is prebuilt, so its release has to exist before this can build.
