@@ -94,6 +94,17 @@ iPad keep their editor.
 - Files added: `CrestMac/Features/Settings/Components/BrowserSpaceLookEditor.swift`,
   `CrestShared/Domain/BrowserSpace/Branding/SpaceBranding+Gradient.swift`
 
+### Opaque command palette
+
+The command palette, which ⌘L and the Start Page open, draws on the solid
+window background instead of Liquid Glass, so the page behind it never shows
+through. The Ctrl-Tab recent-tabs switcher keeps its glass.
+
+- Upstream files edited:
+  `CrestShared/Features/Chrome/Components/BrowserCommandPalette/Components/BrowserCommandPaletteCard.swift`,
+  `CrestShared/Features/Chrome/Components/BrowserCommandPalette/Support/BrowserCommandPaletteOverlayTransition.swift`
+  (a comment)
+
 ## No longer different
 
 - **Readable password prompts.** The fork made password prompts opaque and

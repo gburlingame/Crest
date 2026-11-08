@@ -5213,6 +5213,10 @@
     "readable-password-prompts": {
       "category": "fixed",
       "message": "Password prompts stay readable over any page, including the warning that a sign-in form belongs to a different website."
+    },
+    "opaque-command-palette": {
+      "category": "improved",
+      "message": "The command palette has a solid background, so the page behind it no longer shows through."
     }
   }
 }
