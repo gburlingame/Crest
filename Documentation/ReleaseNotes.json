@@ -5217,6 +5217,10 @@
     "opaque-command-palette": {
       "category": "improved",
       "message": "The command palette has a solid background, so the page behind it no longer shows through."
+    },
+    "new-tab-single-field": {
+      "category": "improved",
+      "message": "New Tab is a single field: press Return to open the address you typed, or search with your default engine, in a new tab."
     }
   }
 }

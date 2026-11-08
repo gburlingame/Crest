@@ -13,7 +13,13 @@ struct BrowserRootCommandPaletteLayer: View {
 
     @ViewBuilder
     var body: some View {
-        if let mode = model.chrome.commandPaletteMode,
+        // New Tab is one field that opens an address or searches; editing an
+        // address keeps the full palette.
+        if model.chrome.commandPaletteMode == .newTab, model.isCommandPaletteShown {
+            BrowserNewTabBar(model: model, contentInsets: contentInsets)
+                .transition(.opacity)
+                .zIndex(BrowserRootMetrics.commandPaletteZIndex)
+        } else if let mode = model.chrome.commandPaletteMode,
             model.isCommandPaletteShown
         {
             BrowserCommandPalette(

@@ -4098,6 +4098,17 @@ struct NavigationStarted: EngineEvent, PageEvent, Equatable, Sendable {
     let sameDocument: Bool
 }
 
+struct NewTabAddress: Query, Equatable, Sendable {
+    typealias Answer = NewTabDestination
+
+    let windowID: UUID
+    let text: String
+}
+
+struct NewTabDestination: Equatable, Sendable {
+    let address: String?
+}
+
 struct NoArchivedTabs: Equatable, Sendable {
     let spaceID: UUID
 }

@@ -105,6 +105,38 @@ through. The Ctrl-Tab recent-tabs switcher keeps its glass.
   `CrestShared/Features/Chrome/Components/BrowserCommandPalette/Support/BrowserCommandPaletteOverlayTransition.swift`
   (a comment)
 
+### New Tab is one field
+
+New Tab (⌘T, and the sidebar's New Tab button) shows a single field instead of
+the command palette, with no recent tabs, actions, history or suggestions.
+Return opens what was typed in a new tab: the address it names, or a search
+with the Space's default engine. Escape or a click beside the field closes it
+without opening a tab. Editing an address with ⌘L, the Start Page's own field
+and a Quick Window's palette keep the full command palette.
+
+What counts as an address is stricter than in the rest of Crest. Text with a
+scheme opens as typed; a full IP address, `localhost` or a local name such as
+`nas.local` opens over http; and a name with a dot opens over https only when
+it ends in a real domain ending, so `github.com` opens while `192.16`, `3.14`
+and `node.js` search. The endings come from IANA's list, copied into
+`DomainEnding.cs` with its version; refresh it from
+https://data.iana.org/TLD/tlds-alpha-by-domain.txt when a new ending matters.
+`CrestCore.Tests/Palette/NewTabAddressTests.cs` covers the rule, so a merge that
+breaks it fails the update script's core tests.
+
+- Upstream files edited:
+  `CrestMac/Features/Browser/BrowserRootView/Components/CommandPalette/BrowserRootCommandPaletteLayer.swift`
+  (shows the field for New Tab),
+  `CrestMac/Features/Browser/BrowserRootView/Models/BrowserRootModel.swift`
+  (keeps the sidebar's address field in place while it shows), and the
+  generated contract files, which the update script regenerates
+- Files added: `CrestCore/src/CrestCore/Application/App/Queries/NewTabAddress.cs`,
+  `CrestCore/src/CrestCore/Domain/Palette/Palette.NewTab.cs`,
+  `CrestCore/src/CrestCore/Domain/Navigation/DomainEnding.cs`,
+  `CrestCore/tests/CrestCore.Tests/Palette/NewTabAddressTests.cs`,
+  `CrestMac/Features/Browser/BrowserRootView/Components/CommandPalette/BrowserNewTabBar.swift`,
+  `CrestMac/Features/Browser/BrowserRootView/Models/BrowserRootModel+NewTabBar.swift`
+
 ## No longer different
 
 - **Readable password prompts.** The fork made password prompts opaque and

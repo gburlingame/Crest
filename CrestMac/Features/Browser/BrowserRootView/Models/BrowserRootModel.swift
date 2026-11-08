@@ -644,7 +644,8 @@ extension BrowserRootModel {
     /// field is on screen whenever the sidebar is, docked or floating.
     func commandPaletteHandoff(reduceMotion: Bool) -> BrowserCommandPaletteHandoff {
         .resolve(
-            isPaletteShown: isCommandPaletteShown,
+            // The New Tab bar never grows out of the field, so the field stays.
+            isPaletteShown: isCommandPaletteShown && chrome.commandPaletteMode != .newTab,
             isFieldOnScreen: sidebarPresentation.showsSidebar,
             animates: BrowserCommandSurfaceMorph.animatesCommandPalette(reduceMotion: reduceMotion)
         )
