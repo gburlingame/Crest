@@ -4745,6 +4745,10 @@
     "simple-space-look": {
       "category": "improved",
       "message": "Give each Space a simple look on Mac: pick one of 16 gradient presets or two colors of your own, with a plain icon or emoji."
+    },
+    "readable-password-prompts": {
+      "category": "fixed",
+      "message": "Password prompts stay readable over any page, including the warning that a sign-in form belongs to a different website."
     }
   }
 }

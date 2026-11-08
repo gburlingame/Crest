@@ -55,12 +55,15 @@ struct BrowserCredentialPromptSurface<Content: View>: View {
     private var surfaceBackground: some View {
         switch metrics.surfaceStyle {
         case .panel:
-            CrestSurfaceLayer(
-                shape: RoundedRectangle(
-                    cornerRadius: BrowserCredentialPromptMetrics.cornerRadius,
-                    style: .continuous
-                )
+            // Opaque underneath, so the page behind can't turn a password
+            // prompt a color its text doesn't read on.
+            let shape = RoundedRectangle(
+                cornerRadius: BrowserCredentialPromptMetrics.cornerRadius,
+                style: .continuous
             )
+            shape
+                .fill(CrestColor.windowBackground)
+                .overlay { CrestSurfaceLayer(shape: shape) }
         case .band:
             CrestSurfaceLayer(shape: Rectangle())
         }
