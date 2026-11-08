@@ -20,7 +20,16 @@ final class SpacePagerViewport<Content: View>: NSView {
         var commitsSelection: Bool
     }
 
+    /// The order the strip runs along: every Space in its order, except
+    /// while a slide jumps to a Space further away than next door.
     private(set) var spaces: [SpaceModel] = []
+    /// Every Space in its order.
+    private var allSpaces: [SpaceModel] = []
+    /// The Spaces a running slide jumps between. The strip's order puts them
+    /// next door until the slide ends, so it moves one page between them.
+    private var jump: (origin: UUID, target: UUID)? {
+        didSet { arrangeStrip() }
+    }
     /// What the Spaces were at the last update, kept as values: the models
     /// change in place, so only a snapshot tells an update what moved.
     private var shownAssignments: [BrowserSpaceRuntimeAssignment] = []
@@ -39,6 +48,11 @@ final class SpacePagerViewport<Content: View>: NSView {
     private var generation: UInt = 0
     private var expectedSelection: UUID?
     private var hosts: [BrowserSpaceRuntimeAssignment: SpacePageHost<Content>] = [:]
+    /// Whether each retained root was last built as the selected page. An
+    /// update rebuilds only the presented root and roots whose role changed:
+    /// the pages observe their own Space, and rebuilding every retained root
+    /// for each update re-evaluates up to four sidebars.
+    private var builtSelections: [BrowserSpaceRuntimeAssignment: Bool] = [:]
     private var makeRoot: ((SpaceModel, Bool) -> SpacePageRoot<Content>)?
     private var selectSpace: (UUID) -> UUID = { $0 }
     private var lastSize = CGSize.zero
@@ -95,6 +109,7 @@ final class SpacePagerViewport<Content: View>: NSView {
     ) {
         // A Space that joins or leaves a group keeps its page.
         hosts.follow(spaces)
+        builtSelections.follow(spaces)
         let assignments = spaces.map(BrowserSpaceRuntimeAssignment.init(space:))
         let accessPolicies = spaces.map(\.settings.accessPolicy)
         let assignmentsChanged = shownAssignments != assignments
@@ -108,7 +123,8 @@ final class SpacePagerViewport<Content: View>: NSView {
         self.presentation = presentation
         pendingContentTopInsets = contentTopInsets
         self.bands = bands
-        self.spaces = spaces
+        allSpaces = spaces
+        arrangeStrip()
         self.selectedSpaceID = selectedSpaceID
         self.isInteractionLocked = isInteractionLocked
         newSpaceStep = spaceStep?.id == self.spaceStep?.id ? nil : spaceStep
@@ -132,7 +148,9 @@ final class SpacePagerViewport<Content: View>: NSView {
             // Actual authoritative selection changes supersede native motion;
             // unrelated updates carrying the old ID do not.
             expectedSelection = nil
-            if let heading = motion?.settledDestination, !reduceMotion,
+            // A jump's strip doesn't hold the Spaces in their order, so a
+            // selection made during one starts again from where it began.
+            if let heading = motion?.settledDestination, jump == nil, !reduceMotion,
                 let step = step(from: heading, to: selectedSpaceID)
             {
                 // The slide no longer decides the selection, even if it ends
@@ -142,17 +160,21 @@ final class SpacePagerViewport<Content: View>: NSView {
                 prepareHosts(around: heading, retaining: selectedSpaceID, refreshContent: false)
                 continueSettlingOnScreen(to: selectedSpaceID, from: heading, step: step)
             } else {
+                let wasMoving = motion != nil
                 cancelMotion()
                 gesture.cancelCurrentGesture()
-                if let origin = presentationSpaceID, !reduceMotion, let step = step(from: origin, to: selectedSpaceID) {
+                // A Space further away than next door slides in as a
+                // neighbour does, one page, from a strip at rest.
+                if let origin = presentationSpaceID, !reduceMotion,
+                    let step = step(from: origin, to: selectedSpaceID)
+                        ?? (wasMoving ? nil : beginJump(from: origin, to: selectedSpaceID))
+                {
                     // Retained pages keep their visible content until the slide
                     // finishes. The latest roots are supplied at completion.
                     prepareHosts(around: selectedSpaceID, retaining: origin, refreshContent: false)
                     animate(to: selectedSpaceID, step: step, commitsSelection: false)
                     return
                 }
-                // A direct nonadjacent choice presents its authoritative page.
-                // It does not create a compressed strip of unrelated neighbors.
                 presentationSpaceID = selectedSpaceID
             }
         }
@@ -163,7 +185,9 @@ final class SpacePagerViewport<Content: View>: NSView {
         }
         if presentationSpaceID == nil { presentationSpaceID = selectedSpaceID }
         applyContentTopInsets(animated: !invalidatesMotion && !selectionChanged)
-        prepareHosts(around: presentationSpaceID ?? selectedSpaceID)
+        // A changed Space or access policy reaches every retained root, so no
+        // root built under an earlier policy lingers offscreen.
+        prepareHosts(around: presentationSpaceID ?? selectedSpaceID, refreshingAll: invalidatesMotion)
         positionHosts()
         updateAccessibility()
         publishPresentation()
@@ -237,6 +261,7 @@ final class SpacePagerViewport<Content: View>: NSView {
         publishPresentation()
         for host in hosts.values { host.removeFromSuperview() }
         hosts.removeAll()
+        builtSelections.removeAll()
         makeRoot = nil
     }
 
@@ -279,6 +304,9 @@ final class SpacePagerViewport<Content: View>: NSView {
         stopHostAnimations()
         releaseSharedBand()
         presentationSpaceID = origin.spaceID
+        // A swipe during a jump pages between the Spaces in their order, from
+        // the page it took over.
+        jump = nil
         motion = Motion(
             generation: generation, origin: origin, offset: inheritedOffset,
             initialOffset: inheritedOffset,
@@ -394,6 +422,7 @@ final class SpacePagerViewport<Content: View>: NSView {
         stopPresentationSampling()
         generation &+= 1
         motion = nil
+        jump = nil
         stopHostAnimations()
         releaseSharedBand()
         positionHosts()
@@ -425,6 +454,25 @@ final class SpacePagerViewport<Content: View>: NSView {
         if abs(targetIndex - originIndex) == 1 { return targetIndex - originIndex }
         guard spaces.count > 2, let direction = newSpaceStep?.direction(from: origin, to: target) else { return nil }
         return direction == .next ? 1 : -1
+    }
+
+    /// Puts `target` next door to `origin` in the strip's order where they lie
+    /// further apart, and answers which way the slide between them goes; nil
+    /// where there is no jump to make.
+    private func beginJump(from origin: UUID, to target: UUID) -> Int? {
+        guard SpacePagerPresentation.jumpOrder(allSpaces, from: origin, to: target, id: \.id) != nil,
+            let originIndex = allSpaces.firstIndex(where: { $0.id == origin }),
+            let targetIndex = allSpaces.firstIndex(where: { $0.id == target })
+        else { return nil }
+        jump = (origin, target)
+        return targetIndex > originIndex ? 1 : -1
+    }
+
+    /// Lays the strip out in its order, or in a running jump's.
+    private func arrangeStrip() {
+        spaces =
+            jump.flatMap { SpacePagerPresentation.jumpOrder(allSpaces, from: $0.origin, to: $0.target, id: \.id) }
+            ?? allSpaces
     }
 
     /// Continues the settling slide toward `destination` once the update that
@@ -663,6 +711,7 @@ final class SpacePagerViewport<Content: View>: NSView {
         stopPresentationSampling()
         let committedSelection = expectedSelection ?? selectedSpaceID
         motion = nil
+        jump = nil
         presentationSpaceID = destination
         if current.commitsSelection, destination != committedSelection { expectedSelection = destination }
         stopHostAnimations()
@@ -731,7 +780,9 @@ final class SpacePagerViewport<Content: View>: NSView {
         spaces.first { $0.id == id }.map(BrowserSpaceRuntimeAssignment.init(space:))
     }
 
-    private func prepareHosts(around id: UUID, retaining extra: UUID? = nil, refreshContent: Bool = true) {
+    private func prepareHosts(
+        around id: UUID, retaining extra: UUID? = nil, refreshContent: Bool = true, refreshingAll: Bool = false
+    ) {
         guard let makeRoot, let index = spaces.firstIndex(where: { $0.id == id }) else { return }
         let neighbors = spaces[max(0, index - 1)...min(spaces.count - 1, index + 1)]
         var required = Set(neighbors.map { BrowserSpaceRuntimeAssignment(space: $0) })
@@ -744,16 +795,21 @@ final class SpacePagerViewport<Content: View>: NSView {
         required.formUnion(spare.map { BrowserSpaceRuntimeAssignment(space: $0.element) })
         for key in hosts.keys where !required.contains(key) {
             hosts.removeValue(forKey: key)?.removeFromSuperview()
+            builtSelections[key] = nil
         }
         for space in spaces {
             let key = BrowserSpaceRuntimeAssignment(space: space)
             guard required.contains(key) else { continue }
+            let isSelected = space.id == selectedSpaceID
             if let host = hosts[key] {
-                if refreshContent || host.hostingView.rootView.assignment != key {
-                    host.hostingView.rootView = makeRoot(space, space.id == selectedSpaceID)
+                let changed = refreshingAll || space.id == id || builtSelections[key] != isSelected
+                if refreshContent && changed || host.hostingView.rootView.assignment != key {
+                    host.hostingView.rootView = makeRoot(space, isSelected)
+                    builtSelections[key] = isSelected
                 }
             } else {
-                let host = SpacePageHost(root: makeRoot(space, space.id == selectedSpaceID))
+                let host = SpacePageHost(root: makeRoot(space, isSelected))
+                builtSelections[key] = isSelected
                 host.frame = CGRect(
                     x: restingOffset(for: key, during: motion) + (motion?.offset ?? 0),
                     y: topInset(at: displayedPosition),
@@ -859,14 +915,24 @@ final class SpacePagerViewport<Content: View>: NSView {
             let origin = spaces.first(where: { $0.id == current.origin.spaceID }),
             let destination = spaces.first(where: { $0.id == target.spaceID }),
             let height = bands?.sharedHeight(between: origin, and: destination), height > 0,
-            let host = hosts[current.origin], let image = Self.image(of: host, top: height)
+            let page = hosts[current.origin]?.layer,
+            let still = Self.still(of: page, top: height, scale: window?.backingScaleFactor ?? 2)
         else { return }
         let band = NSView(frame: CGRect(x: 0, y: topInset(at: displayedPosition), width: bounds.width, height: height))
         band.wantsLayer = true
-        band.layer?.contents = image
-        band.layer?.contentsGravity = .resize
         band.setAccessibilityElement(false)
         addSubview(band, positioned: .above, relativeTo: nil)
+        if let layer = band.layer {
+            // A material's copy keeps its whole frame, so the band clips it.
+            layer.masksToBounds = true
+            // The copy's coordinates run the way the page's do, and its top
+            // meets the band's.
+            still.isGeometryFlipped = Self.runsDown(page) != Self.runsDown(layer)
+            still.frame = CGRect(
+                x: 0, y: Self.runsDown(layer) ? 0 : height - page.bounds.height,
+                width: page.bounds.width, height: page.bounds.height)
+            layer.addSublayer(still)
+        }
         heldBand = band
         for host in hosts.values { Self.mask(host, below: height) }
     }
@@ -879,27 +945,128 @@ final class SpacePagerViewport<Content: View>: NSView {
         for host in hosts.values { host.layer?.mask = nil }
     }
 
-    /// An image of the top `height` points of `host`'s page as its layers
-    /// hold it now, drawn at the window's scale. Core Animation draws the
-    /// layers in about half the time AppKit's view drawing takes.
-    private static func image(of host: NSView, top height: CGFloat) -> CGImage? {
-        let scale = host.window?.backingScaleFactor ?? 2
-        guard let layer = host.layer, host.bounds.width > 0, height > 0,
-            let space = CGColorSpace(name: CGColorSpace.sRGB),
+    /// A copy of the top `height` points of `page` as its layers hold them
+    /// now, drawn at `scale`.
+    private static func still(of page: CALayer, top height: CGFloat, scale: CGFloat) -> CALayer? {
+        guard page.bounds.width > 0, height > 0 else { return nil }
+        let top = CGRect(
+            x: page.bounds.minX, y: runsDown(page) ? page.bounds.minY : page.bounds.maxY - height,
+            width: page.bounds.width, height: height)
+        return copy(of: page, inside: top, scale: scale)
+    }
+
+    /// A copy of `layer` and what it holds inside `visible`, a rect in its
+    /// own coordinates. Core Animation draws a layer in about half the time
+    /// AppKit's view drawing takes, but draws it without its filters, so a
+    /// branch that filters nothing becomes one image, while a layer that
+    /// filters keeps a copy of its own carrying the same filters: the faded
+    /// icon of a tab that isn't loaded would otherwise show in full colour,
+    /// and a pin's material in black.
+    private static func copy(of layer: CALayer, inside visible: CGRect, scale: CGFloat) -> CALayer? {
+        let area = extent(of: layer).intersection(visible)
+        guard !layer.isHidden, !area.isEmpty else { return nil }
+        if isMaterial(layer) { return twin(of: layer) }
+        let copy = CALayer()
+        copy.bounds = layer.bounds
+        copy.position = layer.position
+        copy.anchorPoint = layer.anchorPoint
+        copy.zPosition = layer.zPosition
+        copy.transform = layer.transform
+        copy.sublayerTransform = layer.sublayerTransform
+        copy.isGeometryFlipped = layer.isGeometryFlipped
+        copy.masksToBounds = layer.masksToBounds
+        copy.cornerRadius = layer.cornerRadius
+        copy.cornerCurve = layer.cornerCurve
+        copy.maskedCorners = layer.maskedCorners
+        copy.opacity = layer.opacity
+        copy.allowsGroupOpacity = layer.allowsGroupOpacity
+        copy.filters = layer.filters
+        copy.compositingFilter = layer.compositingFilter
+        copy.backgroundFilters = layer.backgroundFilters
+        let sublayers = (layer.sublayers ?? []).filter { !$0.isHidden }
+        let splits = sublayers.contains(where: needsOwnCopy)
+        let shown = splits ? layer.bounds.intersection(visible) : area
+        if !shown.isEmpty {
+            // Whole pixels, so the image is never stretched.
+            let drawn = CALayer()
+            drawn.frame = CGRect(
+                x: shown.minX, y: shown.minY,
+                width: (shown.width * scale).rounded(.up) / scale, height: (shown.height * scale).rounded(.up) / scale)
+            drawn.contents = drawing(of: layer, in: drawn.frame, scale: scale, alone: splits)
+            copy.addSublayer(drawn)
+        }
+        if splits {
+            for sublayer in sublayers {
+                if let part = Self.copy(of: sublayer, inside: sublayer.convert(visible, from: layer), scale: scale) {
+                    copy.addSublayer(part)
+                }
+            }
+        }
+        return copy
+    }
+
+    /// An image of what `layer` draws inside `rect`, a rect in its own
+    /// coordinates: the layer alone when `alone` is set, or with everything
+    /// beneath it. It is drawn at full opacity, which the layer's copy
+    /// carries instead.
+    private static func drawing(of layer: CALayer, in rect: CGRect, scale: CGFloat, alone: Bool) -> CGImage? {
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
             let context = CGContext(
-                data: nil, width: Int((host.bounds.width * scale).rounded()), height: Int((height * scale).rounded()),
+                data: nil, width: Int((rect.width * scale).rounded()), height: Int((rect.height * scale).rounded()),
                 bitsPerComponent: 8, bytesPerRow: 0, space: space,
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { return nil }
         context.scaleBy(x: scale, y: scale)
         if runsDown(layer) {
-            context.translateBy(x: 0, y: height)
+            context.translateBy(x: 0, y: rect.height)
             context.scaleBy(x: 1, y: -1)
-        } else {
-            context.translateBy(x: 0, y: height - host.bounds.height)
         }
+        context.translateBy(x: -rect.minX, y: -rect.minY)
+        // Drawing skips hidden layers. Both changes are undone before the
+        // transaction ends, so the page never shows them.
+        let shown = alone ? (layer.sublayers ?? []).filter { !$0.isHidden } : []
+        let opacity = layer.opacity
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        layer.opacity = 1
+        for sublayer in shown { sublayer.isHidden = true }
         layer.render(in: context)
+        for sublayer in shown { sublayer.isHidden = false }
+        layer.opacity = opacity
+        CATransaction.commit()
         return context.makeImage()
+    }
+
+    /// Whether `layer` is one of the layers a material draws with, which
+    /// blur, tint and adapt to what lies behind them rather than show what
+    /// they draw.
+    private static func isMaterial(_ layer: CALayer) -> Bool {
+        ["CABackdropLayer", "CAChameleonLayer"].contains { NSClassFromString($0).map(layer.isKind(of:)) ?? false }
+    }
+
+    /// A layer of `layer`'s own kind with every setting it has, including
+    /// the ones of its kind that only an archive carries.
+    private static func twin(of layer: CALayer) -> CALayer? {
+        guard let archive = try? NSKeyedArchiver.archivedData(withRootObject: layer, requiringSecureCoding: true)
+        else { return nil }
+        return try? NSKeyedUnarchiver.unarchivedObject(ofClass: CALayer.self, from: archive)
+    }
+
+    /// Where `layer` and the shown layers beneath it draw, in its own
+    /// coordinates.
+    private static func extent(of layer: CALayer) -> CGRect {
+        (layer.sublayers ?? []).filter { !$0.isHidden }.reduce(layer.bounds) {
+            $0.union(layer.convert(extent(of: $1), from: $1))
+        }
+    }
+
+    /// Whether `layer` or a shown layer beneath it needs a copy of its own:
+    /// one that filters, or one of a material's.
+    private static func needsOwnCopy(_ layer: CALayer) -> Bool {
+        guard !layer.isHidden else { return false }
+        return !(layer.filters ?? []).isEmpty || layer.compositingFilter != nil
+            || !(layer.backgroundFilters ?? []).isEmpty || isMaterial(layer)
+            || (layer.sublayers ?? []).contains(where: needsOwnCopy)
     }
 
     /// Whether `layer`'s own coordinates run down the screen: they do when an

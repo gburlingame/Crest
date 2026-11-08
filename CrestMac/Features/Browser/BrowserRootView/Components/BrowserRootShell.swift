@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct BrowserRootShell: View, BrowserChromeAnimating {
+    // MARK: - Variables
+
     let model: BrowserRootModel
     let transientBrowsing: BrowserTransientBrowsingCoordinator
     let spaceSettingsPresentation: BrowserSpaceSettingsPresentationState
@@ -22,6 +24,8 @@ struct BrowserRootShell: View, BrowserChromeAnimating {
     private var sidebarEdge: HorizontalEdge {
         BrowserChromeAppearance.sidebarEdge(onRight: sidebarOnRight, in: layoutDirection)
     }
+
+    // MARK: - Actions - Presentation
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -67,7 +71,7 @@ struct BrowserRootShell: View, BrowserChromeAnimating {
 
             // Notices show over a fullscreen page too, so one posted there
             // is never lost.
-            BrowserNoticeLayer(chrome: model.chrome)
+            BrowserNoticeLayer(notices: model.chrome.notices)
         }
         .overlayPreferenceValue(BrowserRootPageBoundsKey.self) { anchor in
             GeometryReader { proxy in
@@ -194,6 +198,7 @@ struct BrowserRootShell: View, BrowserChromeAnimating {
             reduceTransparency: reduceTransparency,
             spaces: model.browser.availableSpaces,
             isRevealedByPointer: model.isFloatingSidebarRevealedByPointer,
+            isResizing: model.sidebarWidthTransaction.isResizing,
             hoverChanged: {
                 model.sidebarSurfaceHoverChanged(
                     $0,

@@ -66,7 +66,7 @@ struct SpaceSidebarBrowsingContent: View {
                 openNewTab: openNewTab,
                 createFolder: beginCreatingFolder,
                 showHistory: showHistory,
-                cleanup: browser.cleanupCurrentTabs,
+                cleanup: { _ = tabActions.clearCurrentTabs() },
                 toggleSavedTabs: toggleSavedTabs
             )
         )
@@ -78,7 +78,12 @@ struct SpaceSidebarBrowsingContent: View {
                 createSubSpace: browser.isPrivateBrowsing
                     ? nil
                     : { [space = listContext.space.id] in
-                        if browser.addSubSpace(after: space) { BrowserSpaceGroupNotices.formed() }
+                        do throws(Rejection) {
+                            try browser.addSubSpace(after: space)
+                            BrowserSpaceGroupUpdateNotice.showIfDue()
+                        } catch {
+                            BrowserNoticeCenter.shared.post(.failure(error.explanation))
+                        }
                     }
             )
             .modifier(

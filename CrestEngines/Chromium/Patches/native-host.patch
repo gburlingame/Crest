@@ -831,11 +831,12 @@
  void RenderViewContextMenuMacCocoa::CancelToolkitMenu() {
 --- a/chrome/browser/ui/views/tab_contents/chrome_web_contents_view_delegate_views_mac.h
 +++ b/chrome/browser/ui/views/tab_contents/chrome_web_contents_view_delegate_views_mac.h
-@@ -49,6 +49,7 @@
+@@ -49,6 +49,8 @@
        content::RenderWidgetHost* render_widget_host,
        bool is_popup) override;
    content::WebDragDestDelegate* GetDragDestDelegate() override;
 +  bool HandleDragStart(const content::DropData& data) override;
++  bool ReportsPageAsWindow() override;
    void ShowContextMenu(content::RenderFrameHost& render_frame_host,
                         const content::ContextMenuParams& params) override;
    void StoreFocus() override;
@@ -849,7 +850,7 @@
  #include "chrome/browser/ui/cocoa/renderer_context_menu/render_view_context_menu_mac_cocoa.h"
  #include "chrome/browser/ui/cocoa/renderer_context_menu/render_view_context_menu_mac_remote_cocoa.h"
  #include "chrome/browser/ui/cocoa/tab_contents/web_drag_bookmark_handler_mac.h"
-@@ -76,6 +77,10 @@
+@@ -76,6 +77,16 @@
                       weak_ptr_factory_.GetWeakPtr()));
  }
  
@@ -857,34 +858,140 @@
 +  return crest::BeginLinkDrag(web_contents_, data);
 +}
 +
++// Crest insets each page beside its sidebar and toolbar, which a page would
++// otherwise count as part of its window.
++bool ChromeWebContentsViewDelegateViewsMac::ReportsPageAsWindow() {
++  return crest::IsEnabled();
++}
++
  void ChromeWebContentsViewDelegateViewsMac::BuildMenuAsync(
      content::RenderFrameHost& render_frame_host,
      const content::ContextMenuParams& params,
+--- a/content/browser/renderer_host/render_widget_host_view_mac.h
++++ b/content/browser/renderer_host/render_widget_host_view_mac.h
+@@ -529,6 +529,12 @@
+   // Specify the element to return as the accessibility parent of the
+   // |cocoa_view_|.
+   void SetParentAccessibilityElement(id parent_accessibility_element);
++
++  // Reports the view's own frame as the window its page sees, for an embedder
++  // that insets its pages inside a larger window. The page's outerWidth,
++  // outerHeight, screenX and screenY then describe the page, not the
++  // embedder's window around it.
++  void SetReportsViewAsWindow(bool reports_view_as_window);
+ 
+   RenderWidgetHostViewMac* PopupChildHostView() {
+     return popup_child_host_view_;
+@@ -654,6 +660,10 @@
+   // (where the origin is the upper-left corner of Screen::GetPrimaryDisplay).
+   gfx::Rect window_frame_in_screen_dip_;
+ 
++  // Whether the view's own frame stands for its window (see
++  // SetReportsViewAsWindow).
++  bool reports_view_as_window_ = false;
++
+   // Whether or not the NSView's NSWindow is the key window.
+   bool is_window_key_ = false;
+ 
+--- a/content/browser/renderer_host/render_widget_host_view_mac.mm
++++ b/content/browser/renderer_host/render_widget_host_view_mac.mm
+@@ -434,6 +434,11 @@
+       setAccessibilityParentElement:parent_accessibility_element];
+ }
+ 
++void RenderWidgetHostViewMac::SetReportsViewAsWindow(
++    bool reports_view_as_window) {
++  reports_view_as_window_ = reports_view_as_window;
++}
++
+ RenderWidgetHostViewCocoa* RenderWidgetHostViewMac::GetInProcessNSView() const {
+   if (in_process_ns_view_bridge_)
+     return in_process_ns_view_bridge_->GetNSView();
+@@ -1549,6 +1554,11 @@
+ }
+ 
+ gfx::Rect RenderWidgetHostViewMac::GetBoundsInScreen() {
++  // A page inset in a larger window would otherwise count the embedder's
++  // window around it as its own, which pages read as docked developer tools.
++  if (reports_view_as_window_) {
++    return GetViewBounds();
++  }
+   return window_frame_in_screen_dip_;
+ }
+ 
+@@ -2069,6 +2079,14 @@
+ 
+   if (view_size_changed)
+     UpdateScreenInfo();
++
++  // The view moving inside its window moves the window its page sees.
++  if (reports_view_as_window_ && attached_to_window && !destroy_pending()) {
++    if (host()->delegate())
++      host()->delegate()->SendScreenRects();
++    else
++      host()->SendScreenRects();
++  }
+ }
+ 
+ void RenderWidgetHostViewMac::OnWindowFrameInScreenChanged(
 --- a/content/browser/web_contents/web_contents_view_mac.mm
 +++ b/content/browser/web_contents/web_contents_view_mac.mm
-@@ -265,6 +265,11 @@
+@@ -264,6 +264,11 @@
+   }
  
    NSDragOperation mask = static_cast<NSDragOperation>(allowed_operations);
- 
++
 +  if (delegate_ && delegate_->HandleDragStart(drop_data)) {
 +    web_contents_->SystemDragEnded(source_rwh);
 +    return;
 +  }
-+
+ 
    [drag_dest_ initiateDragWithRenderWidgetHost:source_rwh dropData:drop_data];
    drag_source_start_rwh_ = source_rwh->GetWeakPtr();
+@@ -464,6 +469,7 @@
+   if (delegate()) {
+     view->SetDelegate(
+         delegate()->GetDelegateForHost(render_widget_host, /*is_popup=*/false));
++    view->SetReportsViewAsWindow(delegate()->ReportsPageAsWindow());
+   }
+
+   // Add the RenderWidgetHostView to the ui::Layer hierarchy.
+@@ -691,10 +697,16 @@
+ void WebContentsViewMac::EndDrag(uint32_t drag_operation,
+                                  const gfx::PointF& local_point,
+                                  const gfx::PointF& screen_point) {
++  // Crest: an aborted drop ends the drag as cancelled, so the page doesn't
++  // act on the move or copy the system reported.
+   [drag_dest_
+-      endDrag:base::BindOnce(&WebContentsViewMac::PerformEndDrag,
+-                             deferred_close_weak_ptr_factory_.GetWeakPtr(),
+-                             drag_operation, local_point, screen_point)];
++            endDrag:base::BindOnce(&WebContentsViewMac::PerformEndDrag,
++                                   deferred_close_weak_ptr_factory_.GetWeakPtr(),
++                                   drag_operation, local_point, screen_point)
++      ifDropAborted:base::BindOnce(&WebContentsViewMac::PerformEndDrag,
++                                   deferred_close_weak_ptr_factory_.GetWeakPtr(),
++                                   static_cast<uint32_t>(NSDragOperationNone),
++                                   local_point, screen_point)];
+ }
  
+ void WebContentsViewMac::PerformEndDrag(uint32_t drag_operation,
 --- a/content/public/browser/web_contents_view_delegate.h
 +++ b/content/public/browser/web_contents_view_delegate.h
-@@ -51,6 +51,10 @@
- 
+@@ -51,6 +51,15 @@
+
    // Returns a delegate to process drags not handled by content.
    virtual WebDragDestDelegate* GetDragDestDelegate();
 +
 +  // Lets a native embedder consume an approved renderer drag without starting
 +  // an OS drag session. The default preserves the normal Chromium path.
 +  virtual bool HandleDragStart(const DropData& data) { return false; }
- 
++
++  // Whether a native embedder that insets its pages inside a larger window
++  // reports each page's own frame as the window the page sees. The default
++  // reports the NSWindow, as Chromium does.
++  virtual bool ReportsPageAsWindow() { return false; }
+
    // Shows a context menu.
    //
 --- a/chrome/browser/chrome_content_browser_client.cc
@@ -1745,7 +1852,19 @@
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
  #include "base/functional/callback.h"
-@@ -807,6 +808,21 @@
+@@ -787,6 +788,11 @@
+ void AuthenticatorRequestDialogController::TransitionToModalWebAuthnRequest() {
+   FIDO_LOG(EVENT) << "TransitionToModalWebAuthnRequest from step: "
+                   << model_->step();
++#if BUILDFLAG(IS_MAC)
++  // The person asked for a passkey on another device or a security key, which
++  // the system sheet doesn't offer.
++  crest_dispatched_icloud_keychain_ = true;
++#endif
+ 
+   // Dispatch requests to any plugged in authenticators.
+   for (auto& authenticator : ephemeral_state_.saved_authenticators_) {
+@@ -807,6 +813,21 @@
    if (pending_step_) {
      SetCurrentStep(*pending_step_);
      pending_step_.reset();
@@ -1754,12 +1873,12 @@
 +                 "crest-control-plane") &&
 +             !crest_dispatched_icloud_keychain_ && allow_icloud_keychain_ &&
 +             transport_availability_.has_icloud_keychain) {
-+    // Crest sends passkeys to the system sheet the way Safari does: the macOS
-+    // sheet performs Touch ID/iCloud Keychain and offers its own nearby-device,
-+    // QR and security-key fallbacks, so Chromium's mechanism sheet is not a
-+    // useful first step. This runs once per request; if the user cancels the
-+    // system sheet, `OnUserConsentDenied` calls `StartOver`, which lands on
-+    // Chromium's mechanism selection with this branch already spent.
++    // Crest sends passkeys to the system sheet first, the way Safari does:
++    // the macOS sheet reaches the passkeys of every provider on this Mac. It
++    // offers no phone or security key, which Chromium's mechanism list does,
++    // so a sheet that ends with no passkey for the site (`OnNoPasskeys`), or
++    // one the person cancels (`OnUserConsentDenied`), starts over on that
++    // list. This runs once per request.
 +    crest_dispatched_icloud_keychain_ = true;
 +    ephemeral_state_.did_invoke_platform_despite_no_priority_mechanism_ = true;
 +    StartICloudKeychain();
@@ -1767,22 +1886,50 @@
    } else if (model_->mechanisms.empty()) {
      if (transport_availability_.request_type ==
              device::FidoRequestType::kMakeCredential &&
+@@ -1379,6 +1400,26 @@
+ }
+ 
+ bool AuthenticatorRequestDialogController::OnNoPasskeys() {
++#if BUILDFLAG(IS_MAC)
++  // The system sheet Crest opened first ends without showing anything when
++  // this Mac has no passkey for the site. A passkey on a phone or a security
++  // key may still sign in, so offer Chromium's own mechanisms instead.
++  if (crest_dispatched_icloud_keychain_ &&
++      ephemeral_state_.did_invoke_platform_despite_no_priority_mechanism_ &&
++      ui_presentation() == UIPresentation::kModal &&
++      std::ranges::any_of(model_->mechanisms, [](const Mechanism& mechanism) {
++        if (std::holds_alternative<Mechanism::ICloudKeychain>(mechanism.type)) {
++          return false;
++        }
++        const auto* credential =
++            std::get_if<Mechanism::Credential>(&mechanism.type);
++        return !credential ||
++               credential->value().source != AuthenticatorType::kICloudKeychain;
++      })) {
++    StartOver();
++    return true;
++  }
++#endif
+   SetCurrentStep(Step::kErrorNoPasskeys);
+   return true;
+ }
 --- a/chrome/browser/webauthn/authenticator_request_dialog_controller.h
 +++ b/chrome/browser/webauthn/authenticator_request_dialog_controller.h
-@@ -502,6 +502,13 @@
+@@ -501,6 +501,14 @@
+   // attachment=platform should default to iCloud Keychain rather than the
    // profile authenticator.
    bool should_create_in_icloud_keychain_ = false;
- 
++
 +#if BUILDFLAG(IS_MAC)
 +  // Set once Crest has sent this request straight to the macOS system passkey
-+  // sheet, so that cancelling it returns to Chromium's own mechanism list
-+  // instead of reopening the system sheet.
++  // sheet, or the person asked for a passkey on another device, so that the
++  // request goes on in Chromium's own mechanism list instead of reopening the
++  // system sheet.
 +  bool crest_dispatched_icloud_keychain_ = false;
 +#endif
-+
+ 
    // enclave_enabled_status_ determines whether Google Password Manager entries
    // should be offered both for `makeCredential` or `getAssertion`. If reauth
-   // needed, instead of offering the actual passkeys or creating a passkey,
 --- a/chrome/browser/ui/toasts/toast_controller.cc
 +++ b/chrome/browser/ui/toasts/toast_controller.cc
 @@ -3,6 +3,11 @@
@@ -2288,12 +2435,13 @@
  
 --- a/chrome/browser/chrome_browser_field_trials.cc
 +++ b/chrome/browser/chrome_browser_field_trials.cc
-@@ -55,6 +55,13 @@
+@@ -55,6 +55,14 @@
  #include "ui/gl/gl_switches.h"
  #endif
  
 +#if BUILDFLAG(IS_MAC)
 +#include "chrome/common/chrome_features.h"
++#include "components/lens/lens_features.h"
 +#include "components/security_interstitials/core/features.h"
 +#include "content/public/common/content_features.h"
 +#include "media/base/media_switches.h"
@@ -2302,7 +2450,7 @@
  #if BUILDFLAG(IS_CHROMEOS)
  #include "chrome/common/channel_info.h"
  #include "chromeos/ash/services/multidevice_setup/public/cpp/first_run_field_trial.h"
-@@ -127,6 +134,29 @@
+@@ -127,6 +135,33 @@
      base::FeatureList* feature_list) {
    variations::FeatureOverrides feature_overrides(*feature_list);
  
@@ -2326,6 +2474,10 @@
 +    feature_overrides.DisableFeature(features::kHttpsFirstModeIncognito);
 +    feature_overrides.DisableFeature(
 +        security_interstitials::features::kHttpsFirstDialogUi);
++    // Google Lens needs Chrome's side panel, which Crest's windows don't
++    // have, so a page's menu offers a plain image search instead.
++    feature_overrides.DisableFeature(lens::features::kLensOverlay);
++    feature_overrides.DisableFeature(lens::features::kLensStandalone);
 +  }
 +#endif  // BUILDFLAG(IS_MAC)
 +
@@ -3153,3 +3305,314 @@
  -----END CERTIFICATE-----
  
  # bfff8fd04433487d6a8aa60c1a29767a9fc2bbb05e420f713a13b992891d3893
+--- a/chrome/browser/extensions/api/extension_action/extension_action_api.cc
++++ b/chrome/browser/extensions/api/extension_action/extension_action_api.cc
+@@ -122,8 +122,14 @@
+ bool HasPopupOnActiveTab(BrowserWindowInterface& browser,
+                          content::BrowserContext* browser_context,
+                          const Extension& extension) {
+-  content::WebContents* web_contents =
+-      TabListInterface::From(&browser)->GetActiveTab()->GetContents();
++  // Crest: a Browser can have no tabs, as the one a page-less extension click
++  // opens its popup against, so it can have no active tab either.
++  tabs::TabInterface* active_tab =
++      TabListInterface::From(&browser)->GetActiveTab();
++  if (!active_tab) {
++    return false;
++  }
++  content::WebContents* web_contents = active_tab->GetContents();
+   ExtensionAction* extension_action =
+       ExtensionActionManager::Get(browser_context)
+           ->GetExtensionAction(extension);
+--- a/chrome/browser/extensions/extension_tab_util.cc
++++ b/chrome/browser/extensions/extension_tab_util.cc
+@@ -1032,7 +1032,8 @@
+         if (browser_profile == profile ||
+             browser_profile == incognito_profile) {
+           TabListInterface* tab_list = TabListInterface::From(browser);
+-          if (tab_list) {
++          // Crest: a Browser can have no tabs, and so no active tab.
++          if (tab_list && tab_list->GetActiveTab()) {
+             content::WebContents* tab_contents =
+                 tab_list->GetActiveTab()->GetContents();
+             CHECK(tab_contents);
+--- a/chrome/browser/extensions/api/identity/web_auth_flow.cc
++++ b/chrome/browser/extensions/api/identity/web_auth_flow.cc
+@@ -105,15 +105,11 @@
+ 
+ WebAuthFlow::~WebAuthFlow() {
+   DCHECK(!delegate_);
+-  BrowserWindowInterface* popup_browser =
+-      web_contents()
+-          ? browser_window_util::GetBrowserForTabContents(*web_contents())
+-          : nullptr;
+-  if (popup_browser) {
+-    popup_browser->GetWindow()->Close();
+-  } else if (web_contents()) {
+-    // Explicitly close `web_contents()` if it's not displayed in any browser
+-    // window.
++  // Crest: closes only the page, never the window that shows it. Crest shows
++  // the page as a tab beside the person's own, in the same Browser, which
++  // closing the window would close with it. Chrome's popup holds nothing
++  // else, so closing its only tab closes it too.
++  if (web_contents()) {
+     web_contents()->Close();
+   }
+ 
+@@ -497,13 +493,8 @@
+   // already observe Profile destruction, so we can just be silent here.
+   delegate_ = nullptr;
+ 
+-  BrowserWindowInterface* popup_browser =
+-      web_contents()
+-          ? browser_window_util::GetBrowserForTabContents(*web_contents())
+-          : nullptr;
+-  if (popup_browser) {
+-    popup_browser->GetWindow()->Close();
+-  } else if (web_contents()) {
++  // Crest: closes only the page, as the destructor does.
++  if (web_contents()) {
+     web_contents()->Close();
+   }
+ 
+--- a/chrome/browser/ui/webui/new_tab_page/new_tab_page_handler.cc
++++ b/chrome/browser/ui/webui/new_tab_page/new_tab_page_handler.cc
+@@ -882,7 +882,11 @@
+ 
+   auto* footer_controller =
+       new_tab_footer::NewTabFooterController::From(browser);
+-  CHECK(footer_controller);
++  // Crest: a Browser hosted by Crest has no BrowserView, which is what creates
++  // the footer controller, so its new tab page has no footer.
++  if (!footer_controller) {
++    return;
++  }
+   OnFooterVisibilityUpdated(footer_controller->GetFooterVisible(web_contents_));
+ #endif  // !BUILDFLAG(IS_ANDROID)
+ }
+@@ -1212,7 +1216,11 @@
+ 
+   auto* footer_controller =
+       new_tab_footer::NewTabFooterController::From(browser);
+-  CHECK(footer_controller);
++  // Crest: a Browser hosted by Crest has no BrowserView, which is what creates
++  // the footer controller, so its new tab page has no footer.
++  if (!footer_controller) {
++    return;
++  }
+   footer_controller_observation_.Observe(footer_controller);
+ #endif  // !BUILDFLAG(IS_ANDROID)
+ }
+--- a/chrome/browser/new_tab_page/feature_promo_helper/new_tab_page_feature_promo_helper.cc
++++ b/chrome/browser/new_tab_page/feature_promo_helper/new_tab_page_feature_promo_helper.cc
+@@ -205,9 +205,12 @@
+     content::WebContents* web_contents) {
+ #if !BUILDFLAG(IS_ANDROID)
+   auto* browser_interface = webui::GetBrowserWindowInterface(web_contents);
+-  if (!browser_interface || SidePanelUI::From(browser_interface)
+-                                ->IsSidePanelEntryShowing(SidePanelEntryKey(
+-                                    SidePanelEntryId::kCustomizeChrome))) {
++  // Crest: a Browser hosted by Crest has no BrowserView, which is what creates
++  // the side panel UI, so its new tab page never offers the promo.
++  SidePanelUI* side_panel =
++      browser_interface ? SidePanelUI::From(browser_interface) : nullptr;
++  if (!side_panel || side_panel->IsSidePanelEntryShowing(SidePanelEntryKey(
++                         SidePanelEntryId::kCustomizeChrome))) {
+     return;
+   }
+ 
+--- a/chrome/browser/webauthn/chrome_web_authentication_delegate.cc
++++ b/chrome/browser/webauthn/chrome_web_authentication_delegate.cc
+@@ -81,7 +81,9 @@
+ #endif
+ 
+ #if BUILDFLAG(IS_MAC)
++#include "chrome/browser/webauthn/chrome_authenticator_request_delegate_mac.h"
+ #include "device/fido/mac/credential_metadata.h"
++#include "device/fido/mac/icloud_keychain.h"
+ #endif
+ 
+ namespace {
+@@ -267,6 +269,7 @@
+                      web_authentication_delegate,
+                  base::WeakPtr<content::BrowserContext> browser_context,
+                  const bool is_google,
++                 const url::Origin& caller_origin,
+                  base::OnceCallback<void(std::optional<bool>)> callback,
+                  std::optional<bool> testing_api_override) {
+                 if (!browser_context || !web_authentication_delegate) {
+@@ -289,6 +292,26 @@
+                   return;
+                 }
+ 
++#if BUILDFLAG(IS_MAC)
++                // Crest creates and uses passkeys through the macOS system
++                // sheet, not Chromium's own Touch ID store, so it answers for
++                // the sheet when this Mac can keep passkeys. While an
++                // extension proxies the origin's requests, as remote desktop
++                // tools do, they never reach the sheet and Chromium answers,
++                // which keeps conditional mediation unavailable because it
++                // can't be proxied. Otherwise the answer falls through, which
++                // keeps the platform transport for create() and get().
++                if (base::CommandLine::ForCurrentProcess()->HasSwitch(
++                        "crest-control-plane") &&
++                    !web_authentication_delegate->MaybeGetRequestProxy(
++                        browser_context.get(), caller_origin) &&
++                    device::fido::icloud_keychain::IsSupported() &&
++                    IsICloudKeychainConfiguredForPasskeys()) {
++                  std::move(callback).Run(true);
++                  return;
++                }
++#endif
++
+                 // The enclave won't allow credentials for an account to be
+                 // stored in GPM _in_ that account. So we don't want to tell
+                 // accounts.google.com that there is a platform authenticator
+@@ -317,6 +340,7 @@
+               },
+               weak_ptr_factory_.GetWeakPtr(),
+               render_frame_host->GetBrowserContext()->GetWeakPtr(), is_google,
++              render_frame_host->GetLastCommittedOrigin(),
+               std::move(callback)));
+ }
+ 
+--- a/content/app_shim_remote_cocoa/web_contents_view_cocoa.mm
++++ b/content/app_shim_remote_cocoa/web_contents_view_cocoa.mm
+@@ -242,7 +242,15 @@
+                         image:(NSImage*)image
+                        offset:(NSPoint)offset
+                  isPrivileged:(BOOL)isPrivileged {
+-  if (!_host || !ui::IsDragSessionInitiationAllowed()) {
++  if (!_host) {
++    return;
++  }
++  // Crest: a refused session ends the page's drag as a cancelled one. The
++  // page ignores input until the drag it began ends, so returning without
++  // ending it would leave the page unusable until it reloads.
++  if (!ui::IsDragSessionInitiationAllowed()) {
++    [self endDragAtScreenPoint:NSEvent.mouseLocation
++                     operation:NSDragOperationNone];
+     return;
+   }
+ 
+@@ -340,7 +348,17 @@
+   if (!_host) {
+     return;
+   }
++
++  [self endDragAtScreenPoint:screenPoint operation:operation];
++
++  // The drag is complete. Disconnect the drag source.
++  [_dragSource webContentsIsGone];
++  _dragSource = nil;
++}
+ 
++// Tells the host the drag this view started ended at `screenPoint`.
++- (void)endDragAtScreenPoint:(NSPoint)screenPoint
++                   operation:(NSDragOperation)operation {
+   NSPoint localPoint = NSZeroPoint;
+   if (self.window) {
+     NSPoint basePoint = [self.window convertPointFromScreen:screenPoint];
+@@ -358,10 +376,6 @@
+       GetSanitizedFlippedPoint(screenPoint, screenFrame.size.height);
+ 
+   _host->EndDrag(operation, local_point_f, screen_point_f);
+-
+-  // The drag is complete. Disconnect the drag source.
+-  [_dragSource webContentsIsGone];
+-  _dragSource = nil;
+ }
+ 
+ // NSDraggingDestination methods
+--- a/content/browser/web_contents/web_drag_dest_mac.mm
++++ b/content/browser/web_contents/web_drag_dest_mac.mm
+@@ -10,6 +10,7 @@
+ 
+ #include <algorithm>
+ #include <optional>
++#include <utility>
+ 
+ #include "base/apple/bridging.h"
+ #include "base/apple/foundation_util.h"
+@@ -155,6 +156,12 @@
+   // `completeDropAsync` after the "drop" event has fired.
+   base::ScopedClosureRunner _endDragRunner;
+ 
++  // Crest: what ends this view's drag instead of `_endDragRunner` when the
++  // pending drop is aborted, and whether a drop was aborted before this view's
++  // drag ended.
++  base::OnceClosure _abortedEndDrag;
++  bool _dropAborted;
++
+   // Store DraggingInfo for async callbacks.
+   std::unique_ptr<remote_cocoa::mojom::DraggingInfo> _pendingDragEnteredInfo;
+   std::unique_ptr<remote_cocoa::mojom::DraggingInfo> _pendingDragUpdatedInfo;
+@@ -196,6 +203,7 @@
+ // This ensures all state is properly reset when a drag operation fails or
+ // needs to abort, preventing state leaks and inconsistencies.
+ - (void)cleanupDragState {
++  const bool abortsDrop = _dropInProgress;
+   _currentRWHForDrag.reset();
+ 
+   _dropDataUnfiltered.reset();
+@@ -212,9 +220,19 @@
+   ++_dragUpdatedSequenceNumber;
+   ++_dropSequenceNumber;
+ 
+-  // Release any pending endDrag closure without running it.
+-  // This is an abort/error path - we don't want to fire dragend events.
+-  std::ignore = _endDragRunner.Release();
++  // Crest: a pending endDrag closure means the drag this view started has
++  // ended, and the page ignores input until it hears so. No drop happened, so
++  // the drag ends as cancelled where an aborted end was given; a drag that
++  // hasn't ended yet ends as cancelled when it does.
++  base::OnceClosure aborted = std::move(_abortedEndDrag);
++  if (_endDragRunner && aborted) {
++    std::ignore = _endDragRunner.Release();
++    std::move(aborted).Run();
++  } else if (_endDragRunner) {
++    base::ScopedClosureRunner endDragRunner(std::move(_endDragRunner));
++  } else if (abortsDrop) {
++    _dropAborted = true;
++  }
+ }
+ 
+ // Call to set whether or not we should allow the drop. Takes effect the
+@@ -736,12 +754,23 @@
+ - (void)initiateDragWithRenderWidgetHost:(content::RenderWidgetHostImpl*)rwhi
+                                 dropData:(const content::DropData&)dropData {
+   _dragSecurityInfo.OnDragInitiated(rwhi, dropData);
++  _dropAborted = false;
+ }
+ 
+ - (bool)didInitiateDrag {
+   return _dragSecurityInfo.did_initiate();
+ }
+ 
++- (void)endDrag:(base::OnceClosure)closure
++    ifDropAborted:(base::OnceClosure)aborted {
++  if (std::exchange(_dropAborted, false) && !_dropInProgress) {
++    [self endDrag:std::move(aborted)];
++    return;
++  }
++  _abortedEndDrag = _dropInProgress ? std::move(aborted) : base::OnceClosure();
++  [self endDrag:std::move(closure)];
++}
++
+ - (void)endDrag:(base::OnceClosure)closure {
+   _dragSecurityInfo.OnDragEnded();
+ 
+--- a/content/browser/web_contents/web_drag_dest_mac.h
++++ b/content/browser/web_contents/web_drag_dest_mac.h
+@@ -113,6 +113,11 @@
+ // since it should be fired first.
+ - (void)endDrag:(base::OnceClosure)closure;
+ 
++// Crest: as `endDrag:`, except that if the "drop" still pending is aborted
++// instead, or a drop was aborted since the drag began, `aborted` runs in place
++// of `closure`, so the drag ends as cancelled.
++- (void)endDrag:(base::OnceClosure)closure ifDropAborted:(base::OnceClosure)aborted;
++
+ // Async drag callbacks (called from async helpers).
+ - (void)dragEnterHitTestDidCompleteForView:
+             (base::WeakPtr<content::RenderWidgetHostViewBase>)targetView

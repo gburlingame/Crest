@@ -41,9 +41,7 @@ private struct BrowserSpaceLookPresetGrid: View {
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 8)], spacing: 8) {
             ForEach(SpaceScheme.gradients, id: \.self) { scheme in
-                BrowserCrestStudioChoice(
-                    title: scheme.title, selected: scheme.isWorn(by: branding), tint: .accentColor
-                ) {
+                BrowserCrestStudioChoice(title: scheme.title, selected: scheme.isWorn(by: branding)) {
                     branding = scheme.applying(to: branding)
                 } artwork: {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)

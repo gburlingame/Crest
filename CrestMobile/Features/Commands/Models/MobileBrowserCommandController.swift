@@ -32,9 +32,17 @@ struct MobileBrowserCommandController {
 
     // MARK: - Actions - Tabs
 
+    /// Pins or unpins the tab the window shows, and tells the person why the
+    /// core refused it, such as a full pinned section.
     @discardableResult
     func toggleSelectedTabPinned() -> UUID? {
-        guard let tab = browser.shownTab, browser.togglePin(tab.id) else { return nil }
+        guard let tab = browser.shownTab else { return nil }
+        do throws(Rejection) {
+            guard try browser.togglePin(tab.id) else { return nil }
+        } catch {
+            BrowserNoticeCenter.shared.post(.failure(error.explanation))
+            return nil
+        }
         synchronizePages()
         return tab.id
     }
@@ -83,9 +91,11 @@ struct MobileBrowserCommandController {
         return browser.shownTab?.id
     }
 
-    func cleanupCurrentTabs() {
-        browser.cleanupCurrentTabs()
+    @discardableResult
+    func clearCurrentTabs() -> Bool {
+        guard browser.clearShownSpaceTabs(accessController: spaceAccess) else { return false }
         synchronizePages()
+        return true
     }
 
     @discardableResult

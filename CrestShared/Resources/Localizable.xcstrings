@@ -834,6 +834,29 @@
         }
       }
     },
+    "%lld passwords couldn’t be saved." : {
+      "comment" : "Follows the setup completion summary when an import couldn’t save some passwords.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "1 password couldn’t be saved."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld passwords couldn’t be saved."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld points" : {
       "localizations" : {
         "ar" : {
@@ -3824,6 +3847,12 @@
     "Command-click" : {
 
     },
+    "Command-click opens a new tab, or Option-click when Command opens Peek." : {
+
+    },
+    "Command-click opens a new tab, or Option-click when Command opens Peek. Hold Option to drag the link itself." : {
+
+    },
     "Comments" : {
 
     },
@@ -4039,6 +4068,9 @@
     "Copy Setup" : {
 
     },
+    "Copy URL" : {
+
+    },
     "copy url address clipboard" : {
       "localizations" : {
         "ar" : {
@@ -4058,6 +4090,9 @@
           }
         }
       }
+    },
+    "Copy URL button" : {
+
     },
     "Corner radius" : {
 
@@ -4484,10 +4519,19 @@
         }
       }
     },
+    "Crest couldn’t finish the import or restore the original Keychain inventory. Review this Space before trying again." : {
+
+    },
+    "Crest couldn’t import these passwords. This Space’s passwords are unchanged." : {
+
+    },
     "Crest couldn’t open itself to agents. Turn agents off and on again to try again." : {
 
     },
     "Crest couldn't open your session" : {
+
+    },
+    "Crest couldn’t read that password file." : {
 
     },
     "Crest couldn’t read the iCloud sync state an earlier version saved." : {
@@ -4505,6 +4549,9 @@
           }
         }
       }
+    },
+    "Crest couldn’t read this Space’s passwords. Nothing was imported." : {
+
     },
     "Crest couldn’t remove the passwords it can’t read." : {
 
@@ -4638,6 +4685,9 @@
     },
     "Crest preview" : {
       "extractionState" : "manual"
+    },
+    "Crest quit unexpectedly while reopening your pages." : {
+
     },
     "Crest reads its data when you continue, which may ask for access" : {
 
@@ -5247,6 +5297,9 @@
     "Dim unloaded tabs" : {
 
     },
+    "Dim the page behind Peek" : {
+
+    },
     "Direwolf" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5304,6 +5357,9 @@
     "Division" : {
 
     },
+    "Do you want to try to reopen them?" : {
+
+    },
     "Dock Sidebar" : {
 
     },
@@ -5311,6 +5367,9 @@
 
     },
     "Don’t ask again until it disconnects" : {
+
+    },
+    "Don’t Reopen" : {
 
     },
     "Don't Share" : {
@@ -5413,6 +5472,9 @@
     "Download Languages…" : {
 
     },
+    "Download Linked File" : {
+
+    },
     "Download location" : {
 
     },
@@ -5442,6 +5504,9 @@
 
     },
     "Downloaded" : {
+
+    },
+    "Downloaded %@" : {
 
     },
     "Downloading" : {
@@ -9803,6 +9868,9 @@
         }
       }
     },
+    "Peek size" : {
+
+    },
     "Peek Unavailable" : {
 
     },
@@ -10059,7 +10127,13 @@
     "Practice window" : {
 
     },
+    "Prefer Crest" : {
+
+    },
     "Prefer open tabs" : {
+
+    },
+    "Prefer Website" : {
 
     },
     "Preparing" : {
@@ -10100,6 +10174,12 @@
           }
         }
       }
+    },
+    "Press %@ again to %@" : {
+
+    },
+    "Press %@ Again to %@" : {
+
     },
     "Press Tab to %@" : {
 
@@ -10337,6 +10417,9 @@
       }
     },
     "Put the query placeholder in the path or query, not the fragment." : {
+      "extractionState" : "stale"
+    },
+    "Put the suggestions URL’s placeholder in the path or query, not the fragment." : {
 
     },
     "Quartered" : {
@@ -11531,6 +11614,12 @@
         }
       }
     },
+    "Save or Unsave Current Tab" : {
+
+    },
+    "Save or Unsave Tab" : {
+
+    },
     "Save password?" : {
       "localizations" : {
         "ar" : {
@@ -11659,6 +11748,9 @@
           }
         }
       }
+    },
+    "saved tabs keep bookmark unsave current" : {
+
     },
     "Saved tabs stay above the line until you delete them. The minus button unloads a saved tab while keeping it in your sidebar." : {
 
@@ -12275,6 +12367,12 @@
           }
         }
       }
+    },
+    "Shift (⇧)" : {
+
+    },
+    "Shift-click" : {
+
     },
     "shift" : {
       "localizations" : {
@@ -13674,6 +13772,9 @@
     "Test fixture" : {
 
     },
+    "Test Peek" : {
+
+    },
     "Text" : {
 
     },
@@ -13830,12 +13931,6 @@
           }
         }
       }
-    },
-    "The other key opens a new tab. Hold Option to drag the link itself." : {
-
-    },
-    "The other key opens the link in a new tab." : {
-
     },
     "The page could not be exported." : {
 
@@ -14331,6 +14426,9 @@
       }
     },
     "This site’s certificate is not trusted. Information you send could be read by others." : {
+
+    },
+    "This Space’s saved passwords changed during review. No passwords were imported; choose the file again to refresh conflicts." : {
 
     },
     "This Tab" : {
@@ -15133,10 +15231,13 @@
     "Use %s or {searchTerms} where the search goes. HTTPS only." : {
 
     },
+    "Use a function key, or a key with Command, Option, Control, or Shift." : {
+
+    },
     "Use a public search engine host, not a local or numeric address." : {
 
     },
-    "Use a supported key with Command, Option, Control, or Shift." : {
+    "Use Both" : {
 
     },
     "Use Built-In Shortcuts" : {
@@ -15500,6 +15601,9 @@
 
     },
     "Wheat" : {
+
+    },
+    "When a Website Uses These Keys" : {
 
     },
     "When Crest opens" : {

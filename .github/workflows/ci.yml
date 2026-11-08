@@ -40,9 +40,11 @@ jobs:
           python3 Scripts/release_note_catalog.py
           Scripts/audit-licenses.py
 
+  # Tests that need macOS tools, such as plutil, skip here. A macOS build job
+  # runs the whole suite again on its runner.
   script-tests:
     name: Release and repository contracts
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -50,8 +52,10 @@ jobs:
           ref: ${{ inputs.source_sha || github.sha }}
           allow-unsafe-pr-checkout: ${{ github.event.pull_request.merged == true }}
 
-      - name: Ensure script tools are available
-        run: command -v rg >/dev/null || brew install ripgrep
+      - name: Install the repository shell
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends zsh
 
       - name: Test retained script contracts
         run: python3 -m unittest discover -s Scripts/Tests
@@ -73,10 +77,11 @@ jobs:
 
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
-          dotnet-version: 10.0.201
+          global-json-file: CrestCore/global.json
 
       - name: Test core contracts
-        run: dotnet test CrestCore/tests/CrestCore.Tests/CrestCore.Tests.csproj --nologo
+        working-directory: CrestCore
+        run: dotnet test tests/CrestCore.Tests/CrestCore.Tests.csproj --nologo
 
       - name: Check core analyzers and code style
         run: Scripts/control-plane/lint-dotnet.sh
@@ -131,6 +136,9 @@ jobs:
           paths = [path for path in paths if path and "/Generated/" not in path]
           subprocess.run(["xcrun", "swift-format", "lint", "--strict", "--configuration", ".swift-format", *paths], check=True)
           PYTHON
+
+      - name: Test script contracts with macOS tools
+        run: python3 -m unittest discover -s Scripts/Tests
 
       - name: Build Chromium product host
         run: |
@@ -200,8 +208,9 @@ jobs:
 
       - uses: ./.github/actions/prepare-apple-build
 
-      # The Chromium host job lints Swift whenever it runs; an iOS-only change
-      # skips that job, so this one lints instead.
+      # The Chromium host job lints Swift and tests the script contracts with
+      # macOS tools whenever it runs; an iOS-only change skips that job, so
+      # this one does both instead.
       - name: Check Swift formatting
         if: needs.changes.outputs.mac != 'true'
         run: |
@@ -211,6 +220,10 @@ jobs:
           paths = [path for path in paths if path and "/Generated/" not in path]
           subprocess.run(["xcrun", "swift-format", "lint", "--strict", "--configuration", ".swift-format", *paths], check=True)
           PYTHON
+
+      - name: Test script contracts with macOS tools
+        if: needs.changes.outputs.mac != 'true'
+        run: python3 -m unittest discover -s Scripts/Tests
 
       - name: Build iOS
         run: |
@@ -236,7 +249,7 @@ jobs:
           ref: ${{ inputs.source_sha || github.sha }}
           allow-unsafe-pr-checkout: ${{ github.event.pull_request.merged == true }}
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm

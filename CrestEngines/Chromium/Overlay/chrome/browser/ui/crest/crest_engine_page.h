@@ -132,6 +132,9 @@ class EnginePage final : public content::WebContentsObserver,
   // Runs what the app asked for before the page existed: the restore, the
   // staged link or the load.
   void LoadPending();
+  // Takes the document the page already shows as committed, for a page the
+  // engine opened and loaded by itself before the core adopted it.
+  void AdoptCommittedDocument();
   // The token of the link staged for the page, which a closing page drops.
   std::optional<std::string> TakeStagedToken();
 
@@ -194,6 +197,10 @@ class EnginePage final : public content::WebContentsObserver,
   // The engine fired the page's beforeunload. Answers whether the core had
   // asked, which then hears `proceed`.
   bool AnswerBeforeUnload(bool proceed);
+  // Whether the document the page shows has yet to run its beforeunload
+  // handlers before it goes: it has not agreed to go since the core last
+  // asked, as a close the core prepares asks first.
+  bool AwaitsBeforeUnload();
   // The page's own script asked to close its window, once its document
   // agreed to go; the core decides whether the page closes.
   void RequestClose();
@@ -259,6 +266,7 @@ class EnginePage final : public content::WebContentsObserver,
   void DidChangeThemeColor() override;
   void PrimaryMainFrameRenderProcessGone(base::TerminationStatus status) override;
   void DidGetUserInteraction(const blink::WebInputEvent& event) override;
+  void OnWebContentsFocused(content::RenderWidgetHost* render_widget_host) override;
   void PrimaryMainDocumentElementAvailable() override;
   void DOMContentLoaded(content::RenderFrameHost* frame) override;
   void CrestKeySystemUnavailable(content::RenderFrameHost* frame, const std::string& key_system) override;
@@ -320,7 +328,7 @@ class EnginePage final : public content::WebContentsObserver,
   void Report(engine::EngineEvent event);
   engine::PageSnapshot Snapshot() const;
   std::string Title() const;
-  engine::PageSecurity Security() const;
+  engine::PageSecurityFacts SecurityFacts() const;
   // The engine is about to load the address a page was asked for and shows
   // its initial blank document meanwhile, which is nothing the page shows.
   bool ShowsInitialBlank(const GURL& url) const;
@@ -350,8 +358,13 @@ class EnginePage final : public content::WebContentsObserver,
   std::optional<int64_t> loading_navigation_;
   // A new document committed and has not finished loading.
   bool awaits_finish_ = false;
+  // The page was adopted with a committed document the platform has not
+  // heard of, which it hears when it first shows the page.
+  bool presents_adopted_commit_ = false;
   // The core asked whether the page may go and waits for the answer.
   bool checks_before_unload_ = false;
+  // The document that agreed to go when the core last asked.
+  base::WeakPtr<content::Page> agreed_to_go_;
   // The title last reported.
   std::string reported_title_;
   // The move within the document waiting for its title, and the latest
@@ -407,6 +420,10 @@ class EnginePage final : public content::WebContentsObserver,
 
 // An engine address in Crest's namespace, where `chrome://` is `crest://`.
 std::string PresentedURL(const GURL& url);
+// `url` presented as the platform's URL type holds it exactly, so an address
+// the platform hands back matches it: Foundation accepts only the characters
+// RFC 3986 allows, and rewrites a path, query or fragment holding any other.
+std::string PlatformURL(const GURL& url);
 // A Crest address as the engine loads it.
 GURL EngineURL(const std::string& url);
 

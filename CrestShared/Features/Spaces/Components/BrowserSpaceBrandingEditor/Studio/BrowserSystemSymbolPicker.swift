@@ -16,7 +16,7 @@ struct BrowserSystemSymbolPicker: View {
         .accessibilityLabel("Choose SF Symbol")
         .accessibilityValue(selection)
         .help(selection.isEmpty ? "Choose an SF Symbol" : selection)
-        .popover(isPresented: $isPresented, attachmentAnchor: .rect(.bounds), arrowEdge: .trailing) {
+        .crestPopover(isPresented: $isPresented, attachmentAnchor: .rect(.bounds), arrowEdge: .trailing) {
             BrowserSystemSymbolCatalogPicker(selection: $selection, loadNames: loadNames)
                 .presentationCompactAdaptation(.sheet)
         }
@@ -47,8 +47,7 @@ private struct BrowserSystemSymbolCatalogPicker: View {
                         .labelStyle(.iconOnly).buttonStyle(.plain).foregroundStyle(.secondary)
                 }
             }
-            .padding(12)
-            .background(.primary.opacity(0.05), in: .rect(cornerRadius: 10))
+            .crestFieldSurface(isFocused: searchFocused)
             BrowserSystemSymbolCatalogGrid(selection: selection, query: query, loadNames: loadNames) { name in
                 selection = name
                 dismiss()
@@ -81,9 +80,11 @@ struct BrowserSystemSymbolCatalogGrid: View {
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 8)], spacing: 8) {
                     ForEach(matches, id: \.self) { name in
-                        Button {
+                        CrestSelectableCard(
+                            isSelected: selection == name, accessibilityLabel: Text(verbatim: name), density: .compact
+                        ) {
                             select(name)
-                        } label: {
+                        } content: {
                             VStack(spacing: 8) {
                                 Image(systemName: name)
                                     .resizable().scaledToFit()
@@ -92,20 +93,8 @@ struct BrowserSystemSymbolCatalogGrid: View {
                                 Text(name.replacingOccurrences(of: ".", with: " "))
                                     .font(.caption2).lineLimit(2).frame(height: 30)
                             }
-                            .frame(maxWidth: .infinity).padding(8)
-                            .background(
-                                selection == name ? Color.accentColor.opacity(0.12) : .primary.opacity(0.035),
-                                in: .rect(cornerRadius: 10)
-                            )
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 10).strokeBorder(
-                                    selection == name ? Color.accentColor : .clear, lineWidth: 2)
-                            }
-                            .contentShape(.rect)
                         }
-                        .buttonStyle(.plain).help(name)
-                        .accessibilityLabel(name)
-                        .accessibilityAddTraits(selection == name ? .isSelected : [])
+                        .help(name)
                     }
                 }
                 .padding(2)

@@ -304,15 +304,13 @@ popup of its own, including any page action, reports itself unavailable instead.
 A private window reads the same pinned list narrowed to the extensions enabled
 in incognito.
 
-The row prepares the Space's engine profile itself, so the tiles are there on
-the first Start Page of a launch rather than only once something has been opened
-in the Space. Which Spaces it may prepare is decided by `(spaceID, profileID)`
-against the store family that owns the window it is drawn in, not by identity
-against one application-wide list: a window publishes its own Spaces first, and
-the list would still be empty at that point. A Space belonging to another family,
-such as a borrowed settings workspace or a private window with no persistent
-engine profile of its own, is refused, and so is a locked Space. The preparation is
-idempotent, so it can be asked on every appearance and every Space change.
+The row has the core list the Space's extensions (`ListExtensions`), which
+loads the Space's engine profile, so the tiles are there on the first Start Page
+of a launch rather than only once something has been opened in the Space. The
+core decides which Spaces it lists: one of the person's own Spaces, never a
+private window's, which has no persistent engine profile of its own, a locked
+Space or one being deleted. The listing is idempotent, so it can be asked on
+every appearance and every Space change.
 
 An extension that is still enabled in the registry but whose directory is gone
 is treated as unavailable rather than broken: it contributes no tile and no
@@ -336,14 +334,20 @@ below the control it was opened from, flipping above and sliding along the
 screen at an edge, and Chromium's auto-resize keeps following the document. It
 dismisses on a click outside, on Escape, when its window moves, resizes or
 minimises, when Crest goes to the background, and when the extension closes
-its popup, is unloaded or has its host destroyed.
+its popup, is unloaded or has its host destroyed. A key the popup's or a side
+panel's document does not use goes to the menu bar, as a tab's does, so Copy,
+Paste and the other Edit shortcuts reach the extension's page.
 
 Crest reuses its original extension artwork, badge, pinning, toolbar tiles,
 Site Controls grid, and Space-selection list. `Apple/Extensions/Presentation`
-contains those engine-independent views; `ChromiumExtensionStore` supplies
-profile-scoped Chromium state and native install presentation. Registry, action,
-toolbar, and icon observers refresh the UI without polling. Pinning is stored in
-Chromium's per-profile toolbar preferences.
+contains those engine-independent views; `ChromiumExtensionStore` supplies the
+toolbar's Chromium state and the native menus, confirmations and install review.
+Which Spaces may change or receive an extension, where a copy may go and which
+consent answers a later question are the core's (see "Extensions" in the
+control plane's page lifecycle). Registry, action, toolbar, and icon observers
+refresh the UI without polling, and the binding reports each listed profile's
+extensions to the core again when they change. Pinning is stored in Chromium's
+per-profile toolbar preferences.
 
 On a Chrome Web Store listing, the listing's own install button reads **Add to
 Crest** and runs Crest's install; **Install Extension…** in Site Controls does
@@ -351,16 +355,21 @@ the same thing from the toolbar. Both have the Space's engine profile download
 the CRX3 package from Google's update service with the request Chromium's own
 Web Store installer makes, so one download can install into every Space the
 person picks; Crest sets no size or format limits of its own, and closing the
-review stops the download.
+review stops the download. The request carries no cookies. When the service
+refuses it, as it does for a private or trusted-tester item, it is made once
+more with the Space's cookies, so an account in the Space that can see the item
+receives it.
 Chromium verifies the publisher proof and
 expected ID before Crest shows the original install review layout.
 The review displays Chromium's permission warnings and offers website-access
 withholding where supported. Required API permissions use Chromium's install
 consent semantics rather than the retired WebKit permission emulation.
 Selected additional Spaces install the same downloaded package, each with its own
-signature check and separate extension data. Consent is reused only when the
-verified extension identity, version, and warnings match. Locked, deleted, or
-replaced Space profiles cannot receive a copy.
+signature check and separate extension data. The core reuses consent only when
+the verified extension identity, version, and warnings match, and a locked,
+deleted, or replaced Space profile cannot receive a copy. The package download
+and each install run in the portable binding (`crest_engine_store.cc`), and the
+question Chromium's installer asks goes to the core rather than to a window.
 
 The native Extensions settings pane retains Space selection, extension artwork,
 disclosure rows, enable/remove controls, options pages, and copying to other
@@ -423,16 +432,25 @@ Passkeys use the macOS system sheet, as they do in the WebKit engine. Chromium's
 iCloud Keychain authenticator is only discovered when the browser holds
 `com.apple.developer.web-browser.public-key-credential` and the request carries
 the NSWindow the sheet is presented from. Chromium finds that window through a
-`views::Widget`, which Crest windows do not have, so in Crest mode the window the
-page contents actually live in is used instead. With the authenticator available,
-Crest skips Chromium's own mechanism sheet and sends both `get()` and `create()`
-straight to the system, which performs Touch ID or iCloud Keychain and offers its
-own nearby-device, QR and security-key fallbacks. Cancelling the system sheet
-returns to Chromium's mechanism list once, so the engine's phone, USB and
-security-key flows stay reachable. Creation defaults to iCloud Keychain rather
-than a browser-owned store, and Chromium's staged rollout features for that
-choice do not apply. A build without the entitlement, such as the review package, keeps
-Chromium's own sheet, so passkeys there are not a test of Crest's behaviour.
+`views::Widget`, which Crest windows do not have, so in Crest mode the window
+the page contents actually live in is used instead. With the authenticator
+available, Crest skips Chromium's own mechanism sheet and sends both `get()` and
+`create()` straight to the system, which reaches the passkeys of every provider
+on the Mac and performs Touch ID. The system sheet offers no phone or security
+key. When it ends with no passkey for the site, the request goes on in
+Chromium's mechanism list, as cancelling the sheet does when that list has more
+than one choice, so the engine's phone (QR code), USB and security-key flows
+stay reachable. Choosing a passkey from another device in a sign-in field's
+suggestions goes to that list directly. A site that asks
+`isUserVerifyingPlatformAuthenticatorAvailable()` first, as Duo does before
+offering Touch ID, hears yes when the Mac can keep passkeys, since the system
+sheet performs Touch ID; Chromium's own answer covers only its Touch ID store,
+which Crest does not use. While an extension proxies the site's requests, as
+remote desktop tools do, Chromium answers, since those requests never reach the
+sheet. Creation defaults to iCloud Keychain rather than a browser-owned store,
+and Chromium's staged rollout features for that choice do not apply. A build
+without the entitlement, such as the review package, keeps Chromium's own sheet,
+so passkeys there are not a test of Crest's behaviour.
 
 A private window works like incognito. Its pages use an off-the-record
 profile that is new each time private browsing opens, is always derived from
@@ -471,7 +489,17 @@ tab closed deletes itself on a later task, as it does under Views: the unload
 and tab strip code that emptied it is still running when its window closes. Chromium never
 discards a Crest page (`chrome.tabs.discard` or its own memory saver), because a
 discard replaces the tab's WebContents; the core unloads pages under memory
-pressure instead.
+pressure instead. A page the core closes without asking first, as one unloaded
+under memory pressure, runs its document's beforeunload handlers before its
+WebContents goes, as a discard does: no dialog, and the tab goes once they
+answer or Chromium's beforeunload timeout ends. A document that agreed to go
+when the core asked runs them only once.
+
+Each page reports its own frame as its window: `outerWidth`, `outerHeight`,
+`screenX` and `screenY` describe the page, not the Crest window with its
+sidebar and toolbar. A window that counted them would look to a page like one
+with DevTools docked, which some sites answer by hiding their sign-in from
+storage.
 
 A docked DevTools frontend is mounted inside the Crest page card it inspects.
 This build never creates Chrome's Views contents container, so the

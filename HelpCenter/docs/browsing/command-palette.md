@@ -9,6 +9,8 @@ keywords: [command palette, address bar, search, commands, tabs, history, top hi
 
 Click the address display or press **Command-L**. The same palette can resolve a web address, search query, open tab, saved page, history entry, Space, settings page, or Crest command.
 
+In a Quick Window on Mac, the palette opens from the Quick Window's address field: the address stays where it was, ready to edit, and the results drop below it. What you choose opens in the Quick Window, and a tab opens in the browser window. On iPhone, tap the address bar: the palette rises from the bar, with the best match just above it.
+
 ## Read the results
 
 The first row is what **Return** does. When one result clearly fits what you typed, it leads as the Top Hit: the address the field is completing, a tab or page you use often whose title or address starts with your text, or the result you chose before for the same text. Otherwise the first row opens the address you typed or searches for it with the Space's search engine, and it always follows a Top Hit.
@@ -47,6 +49,6 @@ Type arithmetic such as `24 * 7` to see the answer; **Return** copies it.
 
 ## What the palette remembers
 
-The palette learns which result you choose for what you type, so the result you usually pick for "gi" leads next time. It remembers this for each Space on this device only, never syncs it, and never learns in a private window. Clearing a Space's history forgets it too, and **Settings → Search → Clear Learned Choices** forgets everything it learned.
+The palette learns which result you choose for what you type, so the result you usually pick for "gi" leads next time. It remembers this for each Space, or each Sub-Space group, on this device only, never syncs it, and never learns in a private window. Clearing a Space's history forgets it too, and **Settings → Search → Clear Learned Choices** forgets everything it learned.
 
 Search suggestions from your search engine are optional, never fetched in a private window, and separate from the tabs, history, and actions the palette finds on your device.

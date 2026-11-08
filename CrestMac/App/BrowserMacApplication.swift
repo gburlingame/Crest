@@ -39,6 +39,8 @@ final class BrowserMacApplication {
     /// Answers the core's questions about every engine's downloads: where each
     /// file goes, and whether to keep one its engine warned about.
     let downloadPrompts: BrowserDownloadPrompts
+    /// Confirms each download that finishes while the app is running.
+    let downloadNotices: BrowserDownloadNotices
     /// Offers a switch to another engine for protected video, and a way back.
     let engineMoveNotices: BrowserEngineMoveNotices
     /// Follows the system's memory pressure for every window's pages; nil in
@@ -49,6 +51,10 @@ final class BrowserMacApplication {
     /// The window that opens on `startupBehavior`: the frontmost of the
     /// windows the launch opened. Every other window opens on the tab it left.
     var startupWindowID = BrowserMacWindowRequest.initial.id
+    /// The windows the launch opens on the Start Page instead, while it opens
+    /// them, when the person chose not to reopen pages after a launch that
+    /// ended while it reopened them.
+    var startPageWindowIDs: Set<UUID> = []
     let presentsInstalledApplicationUI: Bool
     /// Whether a tool started Crest in the background, so the launch's
     /// windows open without taking focus.
@@ -281,6 +287,7 @@ final class BrowserMacApplication {
         self.spaceAccess = spaceAccess
         self.spaceSettingsPresentation = spaceSettingsPresentation
         let shortcuts = BrowserShortcutStore(core: core, legacyOverrides: legacyDevice.shortcuts)
+        if let layout = BrowserShortcutKeyboardLayout.current { shortcuts.adoptShiftedDigits(layout.shiftedDigits) }
         self.shortcuts = shortcuts
         self.passkeyAccess = passkeyAccess
         self.softwareUpdates = softwareUpdates
@@ -294,6 +301,7 @@ final class BrowserMacApplication {
         privateWindowCloseGate = BrowserWindowCloseGate(core: core) { [windowID = privateBrowser.windowID] in
             PrepareToCloseWindows(requestID: UUID(), windowIDs: [windowID])
         }
+        downloadNotices = BrowserDownloadNotices(core: core, access: spaceAccess)
         engineMoveNotices = BrowserEngineMoveNotices(core: core)
         let downloadDialogs = BrowserDialogPresenter()
         downloadPrompts = BrowserDownloadPrompts(core: core) { asked, dismissal in
@@ -334,7 +342,8 @@ final class BrowserMacApplication {
             model: model, coordinator: windowCoordinator,
             pagePoolRegistry: pagePoolRegistry, spaceAccess: spaceAccess,
             spaceSettingsPresentation: spaceSettingsPresentation,
-            startupBehavior: model.id == startupWindowID ? startupBehavior : .lastActiveTab,
+            startupBehavior: startPageWindowIDs.contains(model.id)
+                ? .showStartPage : model.id == startupWindowID ? startupBehavior : .lastActiveTab,
             shortcuts: shortcuts, sidebarWidgets: sidebarWidgets, softwareUpdates: softwareUpdates
         )
         .environment(

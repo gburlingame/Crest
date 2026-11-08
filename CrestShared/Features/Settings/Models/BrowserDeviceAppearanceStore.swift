@@ -47,6 +47,9 @@ final class BrowserAddressAppearance {
     /// Whether the field grows into the command palette and the palette
     /// shrinks back into it, rather than the palette opening in place.
     var animatesIntoCommandPalette = true { didSet { changed() } }
+    /// Whether a live site's address field offers a button that copies its
+    /// URL, beside Site Controls. Only the Mac's sidebar field draws it.
+    var showsCopyURLButton = false { didSet { changed() } }
     var color: BrandColor? { didSet { changed() } }
     /// Called after any choice changes, so its owner can save it.
     @ObservationIgnored var changed: () -> Void = {}
@@ -92,7 +95,7 @@ extension BrowserTabAppearance: @MainActor Codable {
 
 extension BrowserAddressAppearance: @MainActor Codable {
     private enum CodingKeys: String, CodingKey {
-        case fill, border, usesAccentWhenEditing, animatesIntoCommandPalette, color
+        case fill, border, usesAccentWhenEditing, animatesIntoCommandPalette, showsCopyURLButton, color
     }
 
     convenience init(from decoder: Decoder) throws {
@@ -103,6 +106,7 @@ extension BrowserAddressAppearance: @MainActor Codable {
         usesAccentWhenEditing = (try? values.decode(Bool.self, forKey: .usesAccentWhenEditing)) ?? false
         animatesIntoCommandPalette =
             (try? values.decode(Bool.self, forKey: .animatesIntoCommandPalette)) ?? true
+        showsCopyURLButton = (try? values.decode(Bool.self, forKey: .showsCopyURLButton)) ?? false
         color = try? values.decode(BrandColor.self, forKey: .color)
     }
 
@@ -112,6 +116,7 @@ extension BrowserAddressAppearance: @MainActor Codable {
         try values.encode(border, forKey: .border)
         try values.encode(usesAccentWhenEditing, forKey: .usesAccentWhenEditing)
         try values.encode(animatesIntoCommandPalette, forKey: .animatesIntoCommandPalette)
+        try values.encode(showsCopyURLButton, forKey: .showsCopyURLButton)
         try values.encodeIfPresent(color, forKey: .color)
     }
 }
@@ -139,6 +144,7 @@ final class BrowserDeviceAppearanceStore {
     static let spaceIconSizingKey = "crest.appearance.spaceIconSizing"
     static let spaceIconScaleKey = "crest.appearance.spaceIconScale"
     static let sidebarRevealWidthKey = "crest.appearance.sidebar-reveal-width"
+    static let peekSizeKey = "crest.appearance.peek-size"
     static let maximumCornerRadius: Double = 40
     /// How long the choices stay still before the store writes them out.
     static let settleDelay = Duration.milliseconds(300)
@@ -174,6 +180,12 @@ final class BrowserDeviceAppearanceStore {
     /// How wide, in points, the strip along the window's edge is that shows a
     /// hidden sidebar when the pointer rests on it. Only the Mac has one.
     var sidebarRevealWidth: Double {
+        didSet { saveSoon() }
+    }
+    /// How much of the room beside the sidebar a Peek's card takes, within
+    /// ``BrowserTransientCardArrangement/pointerCardShares``. Only the Mac's
+    /// Peek floats in that room.
+    var peekSize: Double {
         didSet { saveSoon() }
     }
     /// How tabs look. Replaced only to reset it; otherwise its choices change
@@ -283,6 +295,11 @@ final class BrowserDeviceAppearanceStore {
         sidebarRevealWidth =
             chrome.object(forKey: Self.sidebarRevealWidthKey) as? Double
             ?? Double(BrowserCollapsedSidebarRevealMetrics.pointer.width)
+        let shares = BrowserTransientCardArrangement.pointerCardShares
+        peekSize =
+            (defaults.object(forKey: Self.peekSizeKey) as? Double).flatMap {
+                $0.isFinite ? min(max($0, shares.lowerBound), shares.upperBound) : nil
+            } ?? shares.upperBound
         if defaults.object(forKey: Self.cornerRadiusKey) != nil {
             cornerRadius = defaults.double(forKey: Self.cornerRadiusKey)
         } else {
@@ -382,6 +399,7 @@ final class BrowserDeviceAppearanceStore {
         write(spaceIconSizing.name, forKey: Self.spaceIconSizingKey, in: defaults)
         write(spaceIconScale, forKey: Self.spaceIconScaleKey, in: defaults)
         write(tabScale, forKey: BrowserSidebarDensityPreference.scaleKey, in: defaults)
+        write(peekSize, forKey: Self.peekSizeKey, in: defaults)
         write(pinColumns, forKey: BrowserSidebarDensityPreference.pinColumnsKey, in: defaults)
         write(pinsFillRow, forKey: BrowserSidebarDensityPreference.pinsFillRowKey, in: defaults)
         write(foldersAlwaysVisible, forKey: BrowserFolderAppearancePreference.alwaysVisibleKey, in: defaults)

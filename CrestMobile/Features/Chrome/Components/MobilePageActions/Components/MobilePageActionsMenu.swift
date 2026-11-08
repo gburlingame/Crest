@@ -44,7 +44,7 @@ struct MobilePageActionsMenu: View {
         .accessibilityHint(accessibilityHint)
         .accessibilityIdentifier("page-actions-menu")
         .pagePermissionHost(pages.activePage?.sitePermissionRequests)
-        .popover(
+        .crestPopover(
             item: Binding {
                 pages.activePage?.sitePermissionRequests.current
             } set: { request in
@@ -67,11 +67,11 @@ struct MobilePageActionsMenu: View {
                 .foregroundStyle(
                     pages.blockedPopupNotice == nil
                         ? Color.secondary
-                        : Color.orange
+                        : CrestColor.warning
                 )
             if pages.blockedPopupNotice != nil {
                 Circle()
-                    .fill(.orange)
+                    .fill(CrestColor.warning)
                     .frame(width: 7, height: 7)
                     .offset(x: 3, y: -3)
                     .accessibilityHidden(true)

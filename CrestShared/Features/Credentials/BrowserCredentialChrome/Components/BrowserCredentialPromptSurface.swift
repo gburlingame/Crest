@@ -5,8 +5,8 @@ import SwiftUI
 /// A pointer shell floats a rounded, stroked, lifted panel over the page; a
 /// touch shell runs a band across the content and closes it with a divider.
 /// That, and how much width the prompt may claim, is the whole of the
-/// difference — the padding, the material, and the accessibility container are
-/// the same either way.
+/// difference — the padding, the flyout surface, and the accessibility
+/// container are the same either way.
 struct BrowserCredentialPromptSurface<Content: View>: View {
     let accessibilityLabel: Text
     let accessibilityIdentifier: String
@@ -39,8 +39,8 @@ struct BrowserCredentialPromptSurface<Content: View>: View {
                 maxWidth: maximumWidth,
                 alignment: contentAlignment
             )
-            .background { surfaceBackground }
             .overlay(alignment: .bottom) { surfaceEdge }
+            .crestFlyoutStyle(in: surfaceShape)
             .shadow(
                 color: .black.opacity(shadowOpacity),
                 radius: BrowserCredentialPromptMetrics.shadowRadius,
@@ -51,21 +51,17 @@ struct BrowserCredentialPromptSurface<Content: View>: View {
             .accessibilityIdentifier(accessibilityIdentifier)
     }
 
-    @ViewBuilder
-    private var surfaceBackground: some View {
+    /// The flyout surface a panel rounds and a band runs edge to edge.
+    private var surfaceShape: AnyShape {
         switch metrics.surfaceStyle {
         case .panel:
-            // Opaque underneath, so the page behind can't turn a password
-            // prompt a color its text doesn't read on.
-            let shape = RoundedRectangle(
-                cornerRadius: BrowserCredentialPromptMetrics.cornerRadius,
-                style: .continuous
-            )
-            shape
-                .fill(CrestColor.windowBackground)
-                .overlay { CrestSurfaceLayer(shape: shape) }
+            AnyShape(
+                RoundedRectangle(
+                    cornerRadius: BrowserCredentialPromptMetrics.cornerRadius,
+                    style: .continuous
+                ))
         case .band:
-            CrestSurfaceLayer(shape: Rectangle())
+            AnyShape(Rectangle())
         }
     }
 
