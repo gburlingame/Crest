@@ -9,6 +9,8 @@ final class BrowserMacApplication {
     let hostedNotificationCenter: BrowserHostedWebNotificationSystemCenter
     let browser: BrowserStore
     let cloudSync: BrowserCloudSyncController
+    /// Keeps the filter lists content blocking uses up to date.
+    let filterLists: BrowserFilterListUpdater
     let onboardingProgress: BrowserOnboardingProgressStore
     let pages: BrowserPagePool
     let chrome: BrowserChromeState
@@ -265,6 +267,7 @@ final class BrowserMacApplication {
         browser.sweepAtLaunch()
         self.browser = browser
         self.cloudSync = cloudSync
+        filterLists = BrowserFilterListUpdater(core: core)
         self.onboardingProgress = onboardingProgress
         let initialLayout = windowLayouts.layout(for: BrowserMacWindowRequest.initial.id)
         self.chrome = BrowserChromeState(
@@ -358,6 +361,7 @@ final class BrowserMacApplication {
         .environment(browser.core.engines)
         .environment(\.browserSidebarWidgetRuntime, sidebarWidgets)
         .environment(\.browserSiteControlAnchor, siteControlAnchor)
+        .environment(\.filterListUpdater, filterLists)
         .modifier(BrowserSoftwareUpdateDetailsPresentation())
     }
 
@@ -389,6 +393,7 @@ final class BrowserMacApplication {
             \.browserSettingsTabContent, settingsTabContent(browser: privateBrowser, pages: privatePages)
         )
         .environment(\.browserSiteControlAnchor, siteControlAnchor)
+        .environment(\.filterListUpdater, filterLists)
         .modifier(BrowserSoftwareUpdateDetailsPresentation())
         .background(
             BrowserMacWindowAttachment(

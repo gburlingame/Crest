@@ -152,7 +152,6 @@ struct BrowserSettingsSpacePage: View {
                 browser: browser,
                 spaceAccess: spaceAccess,
                 permissionCenter: pages.permissionCenter,
-                contentBlockingErrorDescription: pages.contentBlockingErrorDescription,
                 fixedSpaceID: space.id
             )
         case .passwords:

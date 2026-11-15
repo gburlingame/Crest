@@ -410,6 +410,9 @@
         }
       }
     },
+    "%@, customized" : {
+
+    },
     "%@, Shared" : {
       "comment" : "Accessibility value of a pinned tab another page shares; the value is its loaded state."
     },
@@ -1779,6 +1782,12 @@
         }
       }
     },
+    "Ad Blocking" : {
+
+    },
+    "Add" : {
+
+    },
     "Add Accent Color" : {
 
     },
@@ -1812,6 +1821,9 @@
 
     },
     "Add languages in System Settings › General › Language & Region." : {
+
+    },
+    "Add List" : {
 
     },
     "Add Packing list" : {
@@ -1848,6 +1860,9 @@
       }
     },
     "Add to Current Tabs Folder" : {
+
+    },
+    "Add to Home Screen" : {
 
     },
     "Add to Selection" : {
@@ -1912,6 +1927,27 @@
       }
     },
     "Adds or removes this password from the selection." : {
+
+    },
+    "AdGuard Annoyances" : {
+
+    },
+    "AdGuard Base" : {
+
+    },
+    "AdGuard Japanese" : {
+
+    },
+    "AdGuard Russian" : {
+
+    },
+    "AdGuard Turkish" : {
+
+    },
+    "Ads and Trackers" : {
+
+    },
+    "ads trackers content blocking filter lists subscribe EasyList uBlock AdGuard my filters custom rules block element cookie notices strict balanced" : {
 
     },
     "ads trackers privacy protection" : {
@@ -2108,6 +2144,9 @@
     "Already saved" : {
 
     },
+    "Also hides cookie notices and other annoyances. A few sites may not work." : {
+
+    },
     "Also share tab audio" : {
       "comment" : "Screen sharing picker option to include the shared tab's sound."
     },
@@ -2144,6 +2183,9 @@
 
     },
     "Animate pages when switching Spaces" : {
+
+    },
+    "Annoyances" : {
 
     },
     "Another browser" : {
@@ -2781,7 +2823,10 @@
         }
       }
     },
-    "Block known ads and trackers" : {
+    "Block ads and trackers" : {
+      "extractionState" : "stale"
+    },
+    "Block Element" : {
 
     },
     "Block known trackers" : {
@@ -2791,6 +2836,15 @@
 
     },
     "Blocked for Session" : {
+
+    },
+    "Blocking" : {
+
+    },
+    "Blocking off" : {
+      "extractionState" : "stale"
+    },
+    "Blocks ads and trackers while keeping sites working." : {
 
     },
     "Blood" : {
@@ -2984,6 +3038,9 @@
 
     },
     "Camera & Microphone" : {
+
+    },
+    "camera microphone site access history cookies data website cache clear browsing" : {
 
     },
     "Cancel" : {
@@ -3332,6 +3389,12 @@
     "Choose sidebar widget" : {
 
     },
+    "Choose the Element Around It" : {
+
+    },
+    "Choose the Element Inside" : {
+
+    },
     "Choose the focused card" : {
 
     },
@@ -3530,6 +3593,9 @@
 
     },
     "Click the name to rename" : {
+
+    },
+    "Click what you want to block" : {
 
     },
     "Click, then press the new shortcut" : {
@@ -3936,6 +4002,7 @@
 
     },
     "Content blocking" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3967,6 +4034,9 @@
       "extractionState" : "stale"
     },
     "content blocking ads trackers camera microphone site access history cookies data website cache clear browsing" : {
+
+    },
+    "content blocking ads trackers filter lists EasyList uBlock AdGuard my filters camera microphone site access history cookies data website cache clear browsing" : {
 
     },
     "Continue" : {
@@ -4145,6 +4215,9 @@
 
     },
     "Couldn’t open language downloads." : {
+
+    },
+    "Couldn’t update" : {
 
     },
     "Country" : {
@@ -4605,6 +4678,9 @@
         }
       }
     },
+    "Crest doesn’t block ads or trackers." : {
+
+    },
     "Crest encountered an unexpected problem while opening %@." : {
       "localizations" : {
         "ar" : {
@@ -4915,6 +4991,9 @@
           }
         }
       }
+    },
+    "Customized" : {
+
     },
     "Cut" : {
 
@@ -5666,6 +5745,9 @@
     "Each Space gets an independent copy with the permissions you choose. Extension data stays separate." : {
 
     },
+    "Each Space keeps its own history and site permissions." : {
+
+    },
     "Each Space keeps its own history, site permissions and blocking." : {
 
     },
@@ -5682,6 +5764,33 @@
           }
         }
       }
+    },
+    "EasyList" : {
+
+    },
+    "EasyList China" : {
+
+    },
+    "EasyList Cookie List" : {
+
+    },
+    "EasyList Dutch" : {
+
+    },
+    "EasyList Germany" : {
+
+    },
+    "EasyList Italy" : {
+
+    },
+    "EasyList Polish" : {
+
+    },
+    "EasyList Spanish" : {
+
+    },
+    "EasyPrivacy" : {
+
     },
     "Edge" : {
 
@@ -5836,6 +5945,9 @@
 
     },
     "Enter an HTTP or HTTPS website." : {
+
+    },
+    "Enter an https address." : {
 
     },
     "Enter Full Screen" : {
@@ -6227,6 +6339,15 @@
           }
         }
       }
+    },
+    "Filter list address" : {
+
+    },
+    "Filter lists updated %@" : {
+
+    },
+    "Filter lists, your rules and sites" : {
+
     },
     "Find" : {
 
@@ -6792,6 +6913,9 @@
         }
       }
     },
+    "hide remove ads annoyance picker filter" : {
+
+    },
     "Hide Sidebar" : {
       "localizations" : {
         "ar" : {
@@ -6927,6 +7051,9 @@
 
     },
     "https://example.com" : {
+
+    },
+    "https://example.com/list.txt" : {
 
     },
     "Hybrid" : {
@@ -8047,6 +8174,9 @@
         }
       }
     },
+    "Liste FR" : {
+
+    },
     "little arc quick lookup" : {
       "localizations" : {
         "ar" : {
@@ -8479,6 +8609,9 @@
     },
     "Muted" : {
       "comment" : "A tab's mark while its page plays with its sound muted."
+    },
+    "My Filters" : {
+
     },
     "Name" : {
       "localizations" : {
@@ -8916,6 +9049,9 @@
     "No saved permissions" : {
 
     },
+    "No Sites Found" : {
+
+    },
     "No Space" : {
       "localizations" : {
         "ar" : {
@@ -9011,6 +9147,9 @@
       }
     },
     "Not signed in" : {
+
+    },
+    "Not yet" : {
 
     },
     "Notes why each result is there, such as “Often visited” or “Already open”." : {
@@ -9118,6 +9257,12 @@
 
     },
     "One per row" : {
+
+    },
+    "One rule per line, as filter lists write them." : {
+
+    },
+    "One rule per line, as filter lists write them. Block Element adds its rules here." : {
 
     },
     "One-time macOS permission · No folder search" : {
@@ -10348,6 +10493,9 @@
     "Private windows" : {
 
     },
+    "Private windows can't be locked." : {
+
+    },
     "Private windows can't have Sub-Spaces." : {
 
     },
@@ -10661,6 +10809,9 @@
 
     },
     "Region" : {
+
+    },
+    "Regional" : {
 
     },
     "Regular" : {
@@ -11127,6 +11278,21 @@
     "Requests permission" : {
 
     },
+    "Require Face ID or passcode" : {
+
+    },
+    "Require Optic ID or passcode" : {
+
+    },
+    "Require passcode" : {
+
+    },
+    "Require password" : {
+
+    },
+    "Require Touch ID or passcode" : {
+
+    },
     "Require Touch ID or password" : {
 
     },
@@ -11357,6 +11523,9 @@
           }
         }
       }
+    },
+    "Revert" : {
+
     },
     "Review" : {
 
@@ -11966,6 +12135,9 @@
     "Search shortcuts" : {
 
     },
+    "Search Sites" : {
+
+    },
     "Search suggestions" : {
 
     },
@@ -12431,6 +12603,9 @@
         }
       }
     },
+    "Show Blocked Elements" : {
+
+    },
     "Show Developer Toolbar" : {
 
     },
@@ -12674,6 +12849,9 @@
 
     },
     "Site Settings" : {
+
+    },
+    "Sites with Blocking Off" : {
 
     },
     "Size" : {
@@ -13408,6 +13586,9 @@
     "Sub-Spaces" : {
 
     },
+    "Subscribe to any list by its address. It updates with the built-in lists." : {
+
+    },
     "Substitutions" : {
 
     },
@@ -13735,6 +13916,9 @@
     "Tap the name to rename" : {
 
     },
+    "Tap what you want to block" : {
+
+    },
     "Teal" : {
 
     },
@@ -14041,6 +14225,9 @@
 
     },
     "These credentials are valid and will be imported. Review the security limitation before continuing." : {
+
+    },
+    "These filters are too long to keep." : {
 
     },
     "These items cannot be placed here. Choose another destination." : {
@@ -14518,6 +14705,9 @@
         }
       }
     },
+    "Too large to use" : {
+
+    },
     "Too many agents are allowed. Forget one in Settings first." : {
 
     },
@@ -14762,7 +14952,17 @@
         }
       }
     },
+    "Turn blocking off for a site from its page menu. Ad blocking settings stay on this device." : {
+
+    },
+    "Turn Off Blocking on %@" : {
+
+    },
+    "Turn Off Blocking on This Site" : {
+
+    },
     "Turn Off Content Blocking in This Space" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14773,6 +14973,7 @@
       }
     },
     "Turn On Balanced Content Blocking in This Space" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14781,6 +14982,15 @@
           }
         }
       }
+    },
+    "Turn On Blocking" : {
+
+    },
+    "Turn on blocking for %@" : {
+
+    },
+    "Turn On Blocking on %@" : {
+
     },
     "Turn on Crest under Privacy & Security > Passkeys Access for Web Browsers in system settings." : {
       "localizations" : {
@@ -14846,6 +15056,21 @@
     "Typing" : {
 
     },
+    "uBlock filters" : {
+
+    },
+    "uBlock filters – Badware risks" : {
+
+    },
+    "uBlock filters – Privacy" : {
+
+    },
+    "uBlock filters – Quick fixes" : {
+
+    },
+    "uBlock filters – Unbreak" : {
+
+    },
     "Ultra Thick" : {
 
     },
@@ -14895,6 +15120,9 @@
 
     },
     "Undock Sidebar" : {
+
+    },
+    "unhide restore undo picker filter" : {
 
     },
     "Unicorn" : {
@@ -15071,6 +15299,9 @@
     "Update Installed" : {
 
     },
+    "Update Now" : {
+
+    },
     "Update password?" : {
       "localizations" : {
         "ar" : {
@@ -15080,6 +15311,9 @@
           }
         }
       }
+    },
+    "Updated" : {
+
     },
     "Updated your Spaces and added %lld tabs." : {
       "comment" : "Completion summary after updating existing Spaces.",
@@ -15188,6 +15422,9 @@
           }
         }
       }
+    },
+    "Updating…" : {
+
     },
     "URL completion: %@. Press Tab or Right Arrow to accept." : {
 
@@ -15710,6 +15947,9 @@
     "You approve each destination in the Save dialog." : {
 
     },
+    "You can add up to %lld lists." : {
+
+    },
     "You can add up to %lld search providers." : {
 
     },
@@ -15761,6 +16001,9 @@
 
     },
     "Your example Space" : {
+
+    },
+    "Your Lists" : {
 
     },
     "Your pinned and saved tabs are still in the sidebar." : {

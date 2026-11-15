@@ -113,6 +113,11 @@ private struct BrowserRootSessionFollower: ViewModifier {
                 runtimeSessionProjection = model.pages.runtimeProjection
                 model.reconcilePages()
             }
+            // Blocking holds for every Space alike, so the device's level
+            // reaches the pages without any change to the session.
+            .onChange(of: model.browser.core.state.contentBlockingPolicy) {
+                runtimeSessionProjection = model.pages.runtimeProjection
+            }
             .onChange(
                 of: runtimeSessionProjection.tabIconState,
                 initial: true
@@ -123,6 +128,12 @@ private struct BrowserRootSessionFollower: ViewModifier {
                 of: runtimeSessionProjection.contentBlockingState,
                 initial: true
             ) {
+                model.reconcileContentBlocking()
+            }
+            .onChange(of: model.browser.core.state.contentRuleLists) {
+                model.reloadContentBlocking()
+            }
+            .onChange(of: model.browser.core.state.blockingSites) {
                 model.reconcileContentBlocking()
             }
             .onChange(

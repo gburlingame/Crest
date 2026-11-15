@@ -49,6 +49,13 @@ Chromium engine the merged code needs, runs the core tests, commits the merge
 and reinstalls. Any other conflict cancels the merge. A weekly reminder checks
 for upstream changes on Sundays and only notifies.
 
+A merge can stop short of upstream's latest commit, to take the part that
+doesn't conflict first, but only at a commit whose engine Crest still
+publishes. Crest keeps just its last few engines, and a commit that changes
+the engine's inputs can have none at all, so check
+`python3 Scripts/control-plane/chromium_engine.py tag` at the chosen commit
+against `gh release view <tag> --repo pauljoda/Crest` before merging it.
+
 The tracked Xcode project is kept current with the fork's own files: the
 update script regenerates it from `project.yml` after every merge, so building
 straight from Xcode works.
