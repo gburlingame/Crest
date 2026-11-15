@@ -4,6 +4,75 @@
     "" : {
 
     },
+    "%@ group" : {
+
+    },
+    "Add to Group" : {
+
+    },
+    "Always show group highlights" : {
+
+    },
+    "Archive Tabs" : {
+
+    },
+    "Collapses this group" : {
+
+    },
+    "Convert to Folder" : {
+
+    },
+    "Convert to Group" : {
+
+    },
+    "Expands this group" : {
+
+    },
+    "Folder actions" : {
+
+    },
+    "Group actions" : {
+
+    },
+    "Group Color" : {
+
+    },
+    "Group Color…" : {
+
+    },
+    "Group Name" : {
+
+    },
+    "Groups" : {
+
+    },
+    "Move to Group" : {
+
+    },
+    "Move to Saved Tabs as Folder" : {
+
+    },
+    "New Group" : {
+
+    },
+    "Remove from Group" : {
+
+    },
+    "Rename Group" : {
+
+    },
+    "Show group color borders" : {
+
+    },
+    "Show group tab counts" : {
+
+    },
+    "Tint Group Name" : {
+
+    },
+    "Ungroup" : {
+
+    },
     "·" : {
       "localizations" : {
         "ar" : {
@@ -718,6 +787,9 @@
     },
     "%lld left out" : {
       "comment" : "How many of a browser's profiles or Spaces an import cannot bring, shown in the import review."
+    },
+    "%lld ms" : {
+
     },
     "%lld of %lld" : {
       "localizations" : {
@@ -1909,6 +1981,9 @@
           }
         }
       }
+    },
+    "Address bar" : {
+
     },
     "Address field" : {
 
@@ -3844,6 +3919,9 @@
         }
       }
     },
+    "Collapses this Split View" : {
+
+    },
     "Color" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3880,6 +3958,9 @@
           }
         }
       }
+    },
+    "Colors" : {
+
     },
     "Combine in Split View" : {
 
@@ -4604,6 +4685,9 @@
     "Crest couldn't open your session" : {
 
     },
+    "Crest couldn’t prepare this import." : {
+
+    },
     "Crest couldn’t read that password file." : {
 
     },
@@ -4959,6 +5043,9 @@
     "Custom accent" : {
 
     },
+    "Custom color" : {
+
+    },
     "Custom Color" : {
       "localizations" : {
         "ar" : {
@@ -4968,6 +5055,9 @@
           }
         }
       }
+    },
+    "Custom gradient" : {
+
     },
     "Customize" : {
       "localizations" : {
@@ -5379,6 +5469,9 @@
     "Dim the page behind Peek" : {
 
     },
+    "Direction" : {
+
+    },
     "Direwolf" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5465,6 +5558,9 @@
       }
     },
     "Done Customizing" : {
+
+    },
+    "Dots" : {
 
     },
     "Double Line" : {
@@ -6076,6 +6172,9 @@
         }
       }
     },
+    "Expands this Split View" : {
+
+    },
     "Experimental" : {
 
     },
@@ -6200,6 +6299,9 @@
     "extensions permissions Chromium Chrome Web Store install copies Spaces" : {
 
     },
+    "extensions popup menu cycle pinned toolbar" : {
+
+    },
     "External Apps" : {
 
     },
@@ -6295,6 +6397,9 @@
 
     },
     "Files & Folders" : {
+
+    },
+    "Fill" : {
 
     },
     "Fills the address without opening it. Press Tab or Right Arrow to accept." : {
@@ -6840,6 +6945,9 @@
     "Help" : {
 
     },
+    "Heraldic (Full)" : {
+
+    },
     "Heraldry" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7146,6 +7254,9 @@
 
     },
     "Icon Type" : {
+
+    },
+    "Icons" : {
 
     },
     "Identity" : {
@@ -7815,6 +7926,9 @@
     "Installing Update" : {
 
     },
+    "Instant" : {
+
+    },
     "Intensity" : {
 
     },
@@ -7907,6 +8021,9 @@
     "Keep Pages Loaded" : {
 
     },
+    "Keep saved tabs after unloading" : {
+
+    },
     "Keep work, personal browsing, and projects in separate Spaces." : {
 
     },
@@ -7976,6 +8093,9 @@
     "Lapis" : {
 
     },
+    "Large" : {
+
+    },
     "Large Phone" : {
 
     },
@@ -8030,6 +8150,9 @@
           }
         }
       }
+    },
+    "Last viewed" : {
+
     },
     "Latest First" : {
 
@@ -8416,6 +8539,9 @@
 
     },
     "Material" : {
+
+    },
+    "Material color" : {
 
     },
     "Meadow" : {
@@ -9078,6 +9204,9 @@
     "No supported page text was found. Editable fields, embedded pages, and images are excluded." : {
 
     },
+    "No Tabs" : {
+
+    },
     "No username" : {
 
     },
@@ -9252,6 +9381,9 @@
           }
         }
       }
+    },
+    "One line" : {
+
     },
     "One or two letters" : {
 
@@ -9473,6 +9605,9 @@
           }
         }
       }
+    },
+    "Open Next Extension" : {
+
     },
     "Open Page in %@" : {
 
@@ -9725,6 +9860,12 @@
           }
         }
       }
+    },
+    "Page address" : {
+
+    },
+    "Page bar for %@" : {
+
     },
     "Page capture selection" : {
 
@@ -10332,6 +10473,9 @@
     "Press Tab, enter your query, then press Return." : {
 
     },
+    "Preview hover" : {
+
+    },
     "Preview open" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10355,6 +10499,9 @@
       }
     },
     "Preview Unavailable" : {
+
+    },
+    "Previews" : {
 
     },
     "Previous" : {
@@ -10818,6 +10965,9 @@
       "extractionState" : "manual"
     },
     "Rejected rows" : {
+
+    },
+    "Relaxed" : {
 
     },
     "Release Notes" : {
@@ -12150,6 +12300,9 @@
     "Search symbols" : {
 
     },
+    "Search Tabs" : {
+
+    },
     "Search the Web" : {
 
     },
@@ -12791,10 +12944,16 @@
     "Sidebar hover area" : {
 
     },
+    "Sidebar hover delay" : {
+
+    },
     "Sidebar on left" : {
 
     },
     "Sidebar on right" : {
+
+    },
+    "Sidebar slide time" : {
 
     },
     "Sidebar widgets" : {
@@ -12815,6 +12974,9 @@
     "Silver" : {
 
     },
+    "Simple" : {
+
+    },
     "Simple Symbol" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -12825,6 +12987,9 @@
           }
         }
       }
+    },
+    "Site" : {
+
     },
     "Site access and data" : {
       "localizations" : {
@@ -12840,6 +13005,9 @@
 
     },
     "site data storage local session indexeddb service workers sign out delete remove" : {
+
+    },
+    "Site only" : {
 
     },
     "Site permissions" : {
@@ -12903,6 +13071,9 @@
 
     },
     "Smooth webpage performance" : {
+
+    },
+    "Snap" : {
 
     },
     "Snowflake" : {
@@ -13051,6 +13222,9 @@
     "Space icon size" : {
 
     },
+    "Space icons" : {
+
+    },
     "Space in review" : {
 
     },
@@ -13103,6 +13277,9 @@
     },
     "Spaces, tabs, folders, colors, icons, and passwords" : {
       "comment" : "What importing from another browser brings. Keep product names as they are."
+    },
+    "Spacing" : {
+
     },
     "Sparkles" : {
       "extractionState" : "stale",
@@ -13573,6 +13750,9 @@
         }
       }
     },
+    "Style" : {
+
+    },
     "Sub-Space of %@" : {
       "localizations" : {
         "ar" : {
@@ -13621,6 +13801,9 @@
       }
     },
     "Sunset Red" : {
+
+    },
+    "Super Copy" : {
 
     },
     "Suspend" : {
@@ -13876,6 +14059,9 @@
     "Tab scale" : {
 
     },
+    "Tab size" : {
+
+    },
     "Tab status" : {
 
     },
@@ -14106,6 +14292,9 @@
     "The file couldn’t be saved in its folder." : {
 
     },
+    "The folder is empty." : {
+
+    },
     "The original filename used invisible or direction-changing characters that can disguise its real extension." : {
       "localizations" : {
         "ar" : {
@@ -14246,6 +14435,15 @@
 
     },
     "This agent is no longer connected to Crest." : {
+
+    },
+    "This also deletes everything inside it: ^[%lld tab](inflect: true) and ^[%lld folder](inflect: true). Deleted tabs go to the Archive." : {
+
+    },
+    "This also deletes the ^[%lld empty folder](inflect: true) inside it." : {
+
+    },
+    "This also deletes the ^[%lld tab](inflect: true) inside it. Deleted tabs go to the Archive." : {
 
     },
     "This bookmark file exceeds Crest’s folder, depth, tab, or Space limits." : {
@@ -14644,6 +14842,9 @@
     "Throttle keeps background tabs working and uses more power. Applies to new tabs." : {
 
     },
+    "Tight" : {
+
+    },
     "Time range" : {
 
     },
@@ -14712,6 +14913,9 @@
 
     },
     "Too many agents are using Crest right now." : {
+
+    },
+    "Top" : {
 
     },
     "Top Hit" : {
@@ -15021,6 +15225,9 @@
           }
         }
       }
+    },
+    "Two lines" : {
+
     },
     "Two records share one identity." : {
 
@@ -15912,6 +16119,9 @@
 
     },
     "With a Sub-Space" : {
+
+    },
+    "With Super Copy, copying or sharing a link leaves out its trackers, using AdGuard's URL Tracking filter. Copying the selected address keeps everything." : {
 
     },
     "Wolf Grey" : {

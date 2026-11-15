@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The desktop's Reset All: the shared choices, plus Space page motion and how
-/// the sidebar reveals itself.
+/// The desktop's Reset All: the shared choices, plus Space page motion and the
+/// sidebar's hover area, hover delay and slide time.
 struct BrowserPlatformLookAndFeelResetSection: View {
     @AppStorage(SpacePageMotionPreference.key)
     private var animatesSpacePages = SpacePageMotionPreference.defaultValue
@@ -12,6 +12,8 @@ struct BrowserPlatformLookAndFeelResetSection: View {
         BrowserLookAndFeelResetFooter {
             animatesSpacePages = SpacePageMotionPreference.defaultValue
             BrowserDeviceAppearanceStore.shared.sidebarRevealWidth = SidebarRevealWidthPreference.defaultValue
+            BrowserDeviceAppearanceStore.shared.sidebarRevealDelay = SidebarRevealDelayPreference.defaultValue
+            BrowserDeviceAppearanceStore.shared.sidebarSlideDuration = BrowserSidebarSlide.defaultValue
             revealsSidebarInFullscreen = SidebarFullscreenRevealPreference.defaultValue
         }
     }

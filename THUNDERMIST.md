@@ -69,37 +69,55 @@ straight from Xcode works.
 ### Sidebar tab text at 14pt
 
 Sidebar tabs on Mac use San Francisco Regular at 14pt, matching Arc, instead of
-13pt, including at the default tab scale. The rename field uses the same font.
-Touch layouts are unchanged.
+13pt, including at the default tab size. Upstream's tab size slider scales that
+14pt as it scales 13pt: text moves half as far as the rows. The rename field
+uses the same font. Touch layouts are unchanged.
 
 - Upstream files edited:
   `CrestShared/Features/Sidebar/Styles/BrowserSidebarDensityFont.swift`,
   `CrestShared/Features/Sidebar/Support/BrowserSidebarDensity.swift`,
   `CrestShared/Features/Sidebar/Components/BrowserSidebarTabRow/Components/BrowserSidebarTabRenameField.swift`
 
-### Simple gradient Space looks on Mac
+### Thundermist gradients
 
-A Space's Appearance page offers 16 two-color gradient presets, two color
-pickers, and a plain icon or emoji, in place of the medieval crest editor. New
-Spaces work through the presets in turn, and setup on Mac skips the choice of
-look. Stored crests and banners stay as they are but draw as plain icons and
-gradients of their own colors on Mac, so the change can be reversed. iPhone and
-iPad keep their editor.
+Sixteen two-color gradients (Thundermist, Midnight, Ocean, Aurora, Forest,
+Dusk, Plum, Ember, Graphite, Sunrise, Peach, Rose, Lavender, Sky, Seafoam and
+Sand) are Space color schemes. Upstream's Modern editor lists every scheme
+among its color presets, so they appear there with no editor change. New
+Spaces take them in turn, and the first Space, Personal, and the Getting
+Started practice Space wear the Thundermist gradient. Setup's look previews
+start from it too.
 
-- Upstream files edited (core): `Device.SetupDraft.cs`, `StartSetup.cs`,
-  `DevicePlatform.cs`, `SpaceScheme.cs`, `SetupLook.cs`, `SpaceTemplate.cs`
-  under `CrestCore/src/CrestCore/`
-- Upstream files edited (Mac): the onboarding window
-  (`BrowserOnboardingModernSheet.swift`, `BrowserOnboardingWelcomePage.swift`,
-  `BrowserOnboardingWindowContent.swift`, `BrowserOnboardingFlow.swift`) and
-  Space settings (`BrowserSettingsSpacePage.swift`,
-  `BrowserSpaceEditorView.swift`, `BrowserSpaceSettingsTab.swift`)
-- Upstream files edited (shared): `BrowserGettingStartedPracticeSidebar.swift`,
-  `SetupLook+Preview.swift`, `BrowserSpaceThemeField.swift`,
-  `BrowserSpaceIdentityIcon.swift`, `BrowserSpaceIdentityArtwork.swift`,
-  `BrowserSpaceSymbolArtworkIdentity.swift`
-- Files added: `CrestMac/Features/Settings/Components/BrowserSpaceLookEditor.swift`,
-  `CrestShared/Domain/BrowserSpace/Branding/SpaceBranding+Gradient.swift`
+The schemes are a list in `SpaceScheme.cs` that upstream may add to; a merge
+that does conflicts there, and keeps both.
+
+- Upstream files edited:
+  `CrestCore/src/CrestCore/Contracts/Session/Branding/Terms/SpaceScheme.cs`
+  (the gradients), `CrestCore/src/CrestCore/Domain/Spaces/SpaceTemplate.cs`
+  and `CrestCore/src/CrestCore/Contracts/Setup/SetupLook.cs` (new Spaces take
+  them in turn), `CrestShared/Features/Onboarding/Support/SetupLook+Preview.swift`
+
+### Only Modern and Simple on Mac
+
+Thundermist shows none of Crest's heraldic theming on Mac. Setup skips the
+choice of look and makes Modern Spaces. Its welcome page shows a plain icon in
+the Thundermist gradient, cycling through the gradients where Crest cycles
+through its templates' banners. A Space's settings read Edit Look… instead of
+Edit Crest… and leave out Artwork Credits, and the Getting Started practice
+sidebar shows plain icons. iPhone and iPad keep upstream's choices.
+
+- Upstream files edited (core): `Device.SetupDraft.cs`, `StartSetup.cs` and
+  `DevicePlatform.cs` under `CrestCore/src/CrestCore/` (setup skips the look)
+- Upstream files edited (Mac):
+  `CrestMac/Features/Onboarding/BrowserOnboardingWindow/Components/BrowserOnboardingWelcomePage/BrowserOnboardingWelcomePage.swift`,
+  `CrestMac/Features/Onboarding/BrowserOnboardingWindow/Components/BrowserOnboardingWindowContent.swift`,
+  `CrestMac/Features/Onboarding/BrowserOnboardingWindow/Models/BrowserOnboardingFlow.swift`,
+  `CrestMac/Features/Settings/Components/BrowserSettingsSpacePage.swift`,
+  `CrestMac/Features/Settings/Models/BrowserSpaceSettingsTab.swift` (search
+  terms)
+- Upstream files edited (shared):
+  `CrestShared/Features/GettingStarted/BrowserGettingStartedPracticeSidebar.swift`
+- Files added: `CrestShared/Domain/BrowserSpace/Branding/SpaceScheme+Gradients.swift`
 
 ### Opaque command palette
 
@@ -184,7 +202,9 @@ progress of downloads. iPhone and iPad keep Crest's palette icons.
 
 Right-clicking a tab offers New Folder, which makes a folder in Saved Tabs and
 moves the tab into it; with several tabs selected it reads New Folder with N
-Tabs and moves them all. The folder goes inside the Saved Tabs folder the tabs
+Tabs and moves them all. A selection that holds folders leaves it out, as it
+does upstream's Move to Group, since New Folder files only tabs. The folder
+goes inside the Saved Tabs folder the tabs
 already share, and at the top of Saved Tabs otherwise, so a pinned or open tab
 moves into Saved Tabs with it. File → New Folder makes an empty folder in
 Saved Tabs, as the Space's ⋯ menu does, and shows the sidebar if it was
@@ -233,3 +253,9 @@ own. Drop this entry and the fork's change if upstream fixes the check.
   their cross-origin warning readable. Upstream then drew every flyout on a
   solid surface with a contrast-safe warning color, so the fork took upstream's
   version. Only the fork's release note remains.
+- **A gradient Space editor on Mac.** The fork replaced the crest editor with
+  16 gradient presets, two color pickers and a plain icon or emoji, and drew
+  every stored crest and banner as a plain icon and gradient on Mac. Upstream
+  then added Modern and Simple styles whose editors cover the same ground, so
+  the fork took upstream's editors and drawing and kept only its gradients
+  (see Thundermist gradients).

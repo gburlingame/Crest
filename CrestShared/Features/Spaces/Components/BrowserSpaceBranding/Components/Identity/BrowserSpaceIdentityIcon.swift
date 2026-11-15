@@ -13,16 +13,6 @@ struct BrowserSpaceIdentityIcon: View {
         self.size = size
     }
 
-    /// On the Mac the icon follows the tone of whatever it sits on, since a
-    /// gradient's own colors would vanish into the sidebar that shows them.
-    private var symbolStyle: some ShapeStyle {
-        #if os(macOS)
-            HierarchicalShapeStyle.primary
-        #else
-            identity.branding.resolvedSymbolColor.color
-        #endif
-    }
-
     var body: some View {
         Group {
             switch BrowserSpaceIdentityArtwork(identity) {
@@ -39,7 +29,7 @@ struct BrowserSpaceIdentityIcon: View {
                 } else {
                     Image(systemName: systemImage)
                         .font(.system(size: size * 0.56, weight: .semibold))
-                        .foregroundStyle(symbolStyle)
+                        .foregroundStyle(identity.branding.resolvedSymbolColor.color)
                         .frame(width: size, height: size)
                 }
             }

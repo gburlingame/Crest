@@ -45,6 +45,6 @@ extension BrowserStore {
         CreateFolder(
             workspaceID: family.workspaceID, spaceID: spaceID, folderID: id, placement: .saved, parentID: parentID,
             title: Self.newFolderTitle, color: BrandColor.folderDefault, symbol: "folder", tabIDs: tabIDs,
-            leavesSplits: false)
+            leavesSplits: false, isGroup: false)
     }
 }

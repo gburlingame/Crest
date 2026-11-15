@@ -11,7 +11,7 @@ public sealed class SpaceScheme {
     /// settles it near #333 by night and #E5E5E5 by day, under a fine grain,
     /// with its icon in a mid gray. The values follow Arc's sidebar.
     public static readonly SpaceScheme Neutral = new("neutral", "Neutral", SchemeLook(
-        [Tincture.NeutralSmoke], Tincture.NeutralGray, strength: 0.15, showsTexture: true));
+        [Tincture.NeutralSmoke], Tincture.NeutralGray, strength: 0.15, textureStrength: 1));
 
     public static readonly SpaceScheme Thundermist = Gradient("thundermist", "Thundermist", new(0.169, 0.227, 0.333), new(0.402, 0.466, 0.536));
     public static readonly SpaceScheme Midnight = Gradient("midnight", "Midnight", new(0.078, 0.118, 0.188), new(0.208, 0.341, 0.490));
@@ -81,7 +81,7 @@ public sealed class SpaceScheme {
     /// best, under the Space's own icon, which follows that tone.
     private static SpaceScheme Gradient(string name, string title, BrandColor start, BrandColor end) =>
         new(name, title, new(new([start, end]), SpaceBannerPattern.Diagonal, BannerStrength: 1, ReadabilityFade: 0,
-            KeepsControlsReadable: false, SpaceThemeMode.Gradient, GradientAngle: 90, ShowsTexture: false,
+            KeepsControlsReadable: false, SpaceThemeMode.Gradient, GradientAngle: 90, TextureStrength: 0,
             SpaceIconStyle.SimpleSymbol, SymbolColor: null, SpaceBranding.Neutral.Crest,
             SpaceBranding.BaselineRenderingVersion, FolderColorIntensity: 0, SpaceTextColorMode.Automatic,
             HasCustomAppearance: false));
@@ -90,9 +90,9 @@ public sealed class SpaceScheme {
     /// window's own background, with no readability fade, its text and
     /// controls following the device's appearance, and the Space's icon in
     /// place of a crest, drawn in `symbol`.
-    private static SpaceBranding SchemeLook(Tincture[] colors, Tincture symbol, double strength, bool showsTexture) =>
+    private static SpaceBranding SchemeLook(Tincture[] colors, Tincture symbol, double strength, double textureStrength) =>
         new(new([.. colors.Select(tincture => tincture.Color)]), SpaceBannerPattern.Diagonal, strength, ReadabilityFade: 0,
-            KeepsControlsReadable: false, SpaceThemeMode.Gradient, GradientAngle: 0, showsTexture, SpaceIconStyle.SimpleSymbol,
+            KeepsControlsReadable: false, SpaceThemeMode.Gradient, GradientAngle: 0, textureStrength, SpaceIconStyle.SimpleSymbol,
             symbol.Color, SpaceBranding.Neutral.Crest, SpaceBranding.BaselineRenderingVersion, FolderColorIntensity: 0,
             SpaceTextColorMode.System, HasCustomAppearance: false);
 

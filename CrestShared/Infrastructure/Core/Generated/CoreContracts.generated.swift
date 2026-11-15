@@ -216,6 +216,7 @@ enum Rejection: Equatable, Error, Sendable {
     case bookmarksUnrecognized(BookmarksUnrecognized)
     case borrowedProfileRequiresOwner(BorrowedProfileRequiresOwner)
     case borrowedWorkspaceRequiresSpace(BorrowedWorkspaceRequiresSpace)
+    case cannotBecomeGroup(CannotBecomeGroup)
     case cannotDeleteLastSpace(CannotDeleteLastSpace)
     case cannotMoveSplitAcrossSpaces(CannotMoveSplitAcrossSpaces)
     case cannotPinSplit(CannotPinSplit)
@@ -244,6 +245,7 @@ enum Rejection: Equatable, Error, Sendable {
     case folderCycle(FolderCycle)
     case folderDepthLimitReached(FolderDepthLimitReached)
     case folderLimitReached(FolderLimitReached)
+    case groupHoldsOnlyTabs(GroupHoldsOnlyTabs)
     case guideSpaceLocked(GuideSpaceLocked)
     case incompleteSplit(IncompleteSplit)
     case invalidAgent(InvalidAgent)
@@ -364,6 +366,7 @@ enum Rejection: Equatable, Error, Sendable {
     case unknownSplitGroup(UnknownSplitGroup)
     case unknownTab(UnknownTab)
     case unknownWorkspace(UnknownWorkspace)
+    case unpreparedImport(UnpreparedImport)
     case unregisteredEngine(UnregisteredEngine)
     case unrelatedWorkspaces(UnrelatedWorkspaces)
     case unsavedWorkspace(UnsavedWorkspace)
@@ -443,6 +446,7 @@ enum Rejection: Equatable, Error, Sendable {
         case .unknownAgentSession(let value): value.message
         case .unknownCloudMerge(let value): value.message
         case .unknownExtension(let value): value.message
+        case .unpreparedImport(let value): value.message
         case .unsuitableDefaultSearch(let value): value.message
         case .unsupportedArchiveVersion(let value): value.message
         case .webPagesOnly(let value): value.message
@@ -472,6 +476,7 @@ enum EngineCommand: Equatable, Sendable {
     case installExtensionPackage(InstallExtensionPackage)
     case listEngineExtensions(ListEngineExtensions)
     case loadPage(LoadPage)
+    case moveEngineExtensionPin(MoveEngineExtensionPin)
     case pauseEngineDownload(PauseEngineDownload)
     case readSiteData(ReadSiteData)
     case recoverPage(RecoverPage)
@@ -1133,6 +1138,7 @@ struct AppPreferences: Equatable, Sendable {
         automaticallyEntersPictureInPicture: true,
         savedTabClose: SavedTabClosePolicy.resumeLastLocation,
         savedTabFaviconReturnsToSavedURL: false,
+        unloadedSavedTabsStay: true,
         splitFocusFollowsMouse: false,
         automaticallyShowsDeveloperToolbar: true,
         showsRecentTabs: true,
@@ -1170,6 +1176,7 @@ struct AppPreferences: Equatable, Sendable {
     var automaticallyEntersPictureInPicture: Bool
     var savedTabClose: SavedTabClosePolicy
     var savedTabFaviconReturnsToSavedURL: Bool
+    var unloadedSavedTabsStay: Bool
     var splitFocusFollowsMouse: Bool
     var automaticallyShowsDeveloperToolbar: Bool
     var showsRecentTabs: Bool
@@ -1505,6 +1512,10 @@ struct CancelExtensionInstall: Intent, ExtensionIntent, Equatable, Sendable {
 }
 
 struct CancelImportRead: Intent, SetupFlowIntent, Equatable, Sendable {
+}
+
+struct CannotBecomeGroup: Equatable, Sendable {
+    let folderID: UUID
 }
 
 struct CannotDeleteLastSpace: Equatable, Sendable {
@@ -1878,6 +1889,13 @@ struct CollapseFolder: Intent, SessionIntent, Equatable, Sendable {
     let collapsed: Bool
 }
 
+struct CollapseSplit: Intent, SessionIntent, Equatable, Sendable {
+    let workspaceID: UUID
+    let spaceID: UUID
+    let groupID: UUID
+    let isCollapsed: Bool
+}
+
 struct ColorPalette: Equatable, Sendable {
     var colors: [BrandColor]
 }
@@ -1971,6 +1989,7 @@ struct CreateFolder: Intent, SessionIntent, Equatable, Sendable {
     let symbol: String?
     let tabIDs: [UUID]
     let leavesSplits: Bool
+    let isGroup: Bool
 }
 
 struct CreatePage: Equatable, Sendable {
@@ -2282,6 +2301,13 @@ struct DeleteBrowsingData: Intent, DataDeletionIntent, Equatable, Sendable {
 
 struct DeleteFolder: Intent, SessionIntent, Equatable, Sendable {
     let workspaceID: UUID
+    let spaceID: UUID
+    let folderID: UUID
+}
+
+struct DeleteFolderAndContents: Intent, SessionIntent, Equatable, Sendable {
+    let workspaceID: UUID
+    let windowID: UUID
     let spaceID: UUID
     let folderID: UUID
 }
@@ -2882,6 +2908,7 @@ struct ExtensionAction: Equatable, Sendable, Identifiable {
     let icon: Data?
     let pinned: Bool
     let enabled: Bool
+    let hasPopup: Bool
 }
 
 struct ExtensionActionList: Equatable, Sendable {
@@ -3204,6 +3231,7 @@ struct FolderState: Equatable, Sendable, Identifiable {
     let isCollapsed: Bool
     let collapseModifiedAt: Date?
     let orderAnchorTabID: UUID?
+    let isGroup: Bool
     let displaySymbol: String
     let displayColor: BrandColor
 
@@ -3219,6 +3247,7 @@ struct FolderState: Equatable, Sendable, Identifiable {
         var isCollapsed: Bool
         var collapseModifiedAt: Date?
         var orderAnchorTabID: UUID?
+        var isGroup: Bool
     }
 
     /// The record's fields alone, as a platform sends it back.
@@ -3232,7 +3261,8 @@ struct FolderState: Equatable, Sendable, Identifiable {
             parentID: parentID,
             isCollapsed: isCollapsed,
             collapseModifiedAt: collapseModifiedAt,
-            orderAnchorTabID: orderAnchorTabID
+            orderAnchorTabID: orderAnchorTabID,
+            isGroup: isGroup
         )
     }
 }
@@ -3244,6 +3274,7 @@ struct FolderTabs: Intent, SessionIntent, Equatable, Sendable {
     let selection: TabSelection
     let placement: TabPlacement
     let title: String?
+    let isGroup: Bool
 }
 
 struct FolderTabsAround: Intent, SessionIntent, Equatable, Sendable {
@@ -3253,6 +3284,7 @@ struct FolderTabsAround: Intent, SessionIntent, Equatable, Sendable {
     let selection: TabSelection
     let tabID: UUID
     let title: String?
+    let isGroup: Bool
 }
 
 struct FoldersChanged: CoreChange, Equatable, Sendable {
@@ -3304,6 +3336,10 @@ struct GetSiteContentBlocking: Query, Equatable, Sendable {
 struct GoToHistoryEntry: Equatable, Sendable {
     let pageID: UUID
     let entryID: UUID
+}
+
+struct GroupHoldsOnlyTabs: Equatable, Sendable {
+    let groupID: UUID
 }
 
 struct GroupPages: Equatable, Sendable {
@@ -3973,6 +4009,7 @@ struct LinkPreferences: Equatable, Sendable {
     let dimsPageBehindPeek: Bool
     let archivePolicy: QuickWindowArchivePolicy
     let remembersSpaceBySite: Bool
+    let cleansCopiedLinks: Bool
     let routes: [LinkRoute]
     let rememberedSites: [RememberedSite]
 }
@@ -3995,6 +4032,12 @@ struct LinkRouteExists: Equatable, Sendable {
 
 struct LinkRoutesFull: Equatable, Sendable {
     let maximum: Int
+}
+
+struct LinkToCopy: Query, Equatable, Sendable {
+    typealias Answer = String
+
+    let url: String
 }
 
 struct ListDropTarget: Equatable, Sendable {
@@ -4133,6 +4176,12 @@ struct MostRecentCredential: Query, Equatable, Sendable {
     let records: [CredentialRecord]
 }
 
+struct MoveEngineExtensionPin: Equatable, Sendable {
+    let profileID: UUID
+    let extensionID: String
+    let beforeExtensionID: String?
+}
+
 struct MoveFolder: Intent, SessionIntent, Equatable, Sendable {
     let workspaceID: UUID
     let spaceID: UUID
@@ -4141,6 +4190,14 @@ struct MoveFolder: Intent, SessionIntent, Equatable, Sendable {
     let parentID: UUID?
     let beforeFolderID: UUID?
     let beforeTabID: UUID?
+}
+
+struct MoveFolderToSpace: Intent, SessionIntent, Equatable, Sendable {
+    let workspaceID: UUID
+    let windowID: UUID
+    let spaceID: UUID
+    let folderID: UUID
+    let destinationSpaceID: UUID
 }
 
 struct MoveLinkRoute: Intent, LinkIntent, Equatable, Sendable {
@@ -4161,6 +4218,13 @@ struct MovePageToWindow: PageRequest, Equatable, Sendable {
 
     let pageID: UUID
     let windowID: UUID
+}
+
+struct MovePinnedExtension: Intent, ExtensionIntent, Equatable, Sendable {
+    let spaceID: UUID
+    let engine: EngineKind
+    let extensionID: String
+    let beforeExtensionID: String?
 }
 
 struct MoveSetupSpace: Intent, SetupDraftIntent, Equatable, Sendable {
@@ -4444,6 +4508,7 @@ struct OpenAddress: Intent, SessionIntent, Equatable, Sendable {
     let spaceID: UUID
     let tabID: UUID
     let address: String
+    let joinsFolder: Bool
 }
 
 struct OpenCloudTransport: Intent, CloudTransportIntent, Equatable, Sendable {
@@ -4487,6 +4552,8 @@ struct OpenTab: Intent, SessionIntent, Equatable, Sendable {
     let placement: TabPlacement
     let afterTabID: UUID?
     let shows: Bool
+    let joinsFolder: Bool
+    let savesInSavedFolder: Bool
 }
 
 struct OpenWindow: Intent, WindowIntent, Equatable, Sendable {
@@ -5647,6 +5714,12 @@ struct RestoreInteractionState: PageRequest, Equatable, Sendable {
     let expectedURL: String
 }
 
+struct RestoreLook: Query, Equatable, Sendable {
+    typealias Answer = RestoredLook
+
+    let text: String
+}
+
 struct RestoreSearchCatalog: Intent, SearchCatalogIntent, Equatable, Sendable {
     let language: String?
     let region: String?
@@ -5657,6 +5730,10 @@ struct RestoreTabHistory: Intent, PageIntent, Equatable, Sendable {
     let spaceID: UUID
     let tabID: UUID
     let archive: Data
+}
+
+struct RestoredLook: Equatable, Sendable {
+    let look: SpaceBranding?
 }
 
 struct ResumeDownload: Intent, DownloadIntent, Equatable, Sendable {
@@ -6106,6 +6183,13 @@ struct SetFolderColor: Intent, SessionIntent, Equatable, Sendable {
     let color: BrandColor
 }
 
+struct SetFolderGroup: Intent, SessionIntent, Equatable, Sendable {
+    let workspaceID: UUID
+    let spaceID: UUID
+    let folderID: UUID
+    let isGroup: Bool
+}
+
 struct SetFolderSymbol: Intent, SessionIntent, Equatable, Sendable {
     let workspaceID: UUID
     let spaceID: UUID
@@ -6451,6 +6535,7 @@ struct ShowStartPage: Intent, SessionIntent, Equatable, Sendable {
     let spaceID: UUID
     let tabID: UUID
     let outsideSplits: Bool
+    let joinsFolder: Bool
 }
 
 struct ShowTab: Intent, WindowIntent, Equatable, Sendable {
@@ -6609,7 +6694,7 @@ struct SpaceBranding: Equatable, Sendable {
         keepsControlsReadable: true,
         themeMode: SpaceThemeMode.banner,
         gradientAngle: 0,
-        showsTexture: false,
+        textureStrength: 0,
         iconStyle: SpaceIconStyle.simpleSymbol,
         symbolColor: nil,
         crest: SpaceCrest(
@@ -6656,7 +6741,7 @@ struct SpaceBranding: Equatable, Sendable {
     var keepsControlsReadable: Bool
     var themeMode: SpaceThemeMode
     var gradientAngle: Double
-    var showsTexture: Bool
+    var textureStrength: Double
     var iconStyle: SpaceIconStyle
     var symbolColor: BrandColor?
     var crest: SpaceCrest
@@ -6947,6 +7032,8 @@ struct SplitGroupState: Equatable, Sendable, Identifiable {
     let iconModifiedAt: Date?
     let tint: BrandColor?
     let tintModifiedAt: Date?
+    let isCollapsed: Bool
+    let collapseModifiedAt: Date?
     let displayTitle: String?
     let displayEmojiIcon: String?
 
@@ -6964,6 +7051,8 @@ struct SplitGroupState: Equatable, Sendable, Identifiable {
         var iconModifiedAt: Date?
         var tint: BrandColor?
         var tintModifiedAt: Date?
+        var isCollapsed: Bool
+        var collapseModifiedAt: Date?
     }
 
     /// The record's fields alone, as a platform sends it back.
@@ -6975,7 +7064,9 @@ struct SplitGroupState: Equatable, Sendable, Identifiable {
             customIconSymbol: customIconSymbol,
             iconModifiedAt: iconModifiedAt,
             tint: tint,
-            tintModifiedAt: tintModifiedAt
+            tintModifiedAt: tintModifiedAt,
+            isCollapsed: isCollapsed,
+            collapseModifiedAt: collapseModifiedAt
         )
     }
 }
@@ -7119,9 +7210,19 @@ struct StoreInstallRequested: Equatable, Sendable {
     let extensionID: String
 }
 
+struct StoreLook: Query, Equatable, Sendable {
+    typealias Answer = StoredLook
+
+    let look: SpaceBranding
+}
+
 struct StoreRemovalRequested: Equatable, Sendable {
     let pageID: UUID
     let extensionID: String
+}
+
+struct StoredLook: Equatable, Sendable {
+    let text: String
 }
 
 struct StoredSessionClosed: Equatable, Sendable {
@@ -7517,6 +7618,14 @@ struct UnknownTab: Equatable, Sendable {
 
 struct UnknownWorkspace: Equatable, Sendable {
     let workspaceID: UUID
+}
+
+struct UnpreparedImport: Equatable, Sendable {
+    let cause: String
+
+    var message: LocalizedStringResource {
+        LocalizedStringResource("Crest couldn’t prepare this import.")
+    }
 }
 
 struct UnregisteredEngine: Equatable, Sendable {
@@ -14977,6 +15086,7 @@ struct LinkBehavior: Hashable, Sendable {
     static let dragsLinksToPeek = LinkBehavior(tag: 3, name: "dragsLinksToPeek")
     static let dimsPageBehindPeek = LinkBehavior(tag: 4, name: "dimsPageBehindPeek")
     static let remembersSpaceBySite = LinkBehavior(tag: 5, name: "remembersSpaceBySite")
+    static let cleansCopiedLinks = LinkBehavior(tag: 6, name: "cleansCopiedLinks")
 
     static let all: [LinkBehavior] = [
         focusesNewTabs,
@@ -14984,7 +15094,8 @@ struct LinkBehavior: Hashable, Sendable {
         opensPeekAutomatically,
         dragsLinksToPeek,
         dimsPageBehindPeek,
-        remembersSpaceBySite
+        remembersSpaceBySite,
+        cleansCopiedLinks
     ]
 
     static func named(_ name: String?) -> LinkBehavior? {
@@ -18586,6 +18697,7 @@ struct SetupLook: Hashable, Sendable {
     enum Kinds: Sendable {
         case heraldic
         case modern
+        case simple
     }
 
     let tag: Int
@@ -18595,6 +18707,7 @@ struct SetupLook: Hashable, Sendable {
     var themeMode: SpaceThemeMode { facts.themeMode }
     var iconStyle: SpaceIconStyle { facts.iconStyle }
     var gradientAngle: Double? { facts.gradientAngle }
+    var tint: Double? { facts.tint }
     private let facts: Facts
 
     private init(
@@ -18604,7 +18717,8 @@ struct SetupLook: Hashable, Sendable {
         title: LocalizedStringResource,
         themeMode: SpaceThemeMode,
         iconStyle: SpaceIconStyle,
-        gradientAngle: Double?
+        gradientAngle: Double?,
+        tint: Double?
     ) {
         self.tag = tag
         facts = Facts(
@@ -18613,7 +18727,8 @@ struct SetupLook: Hashable, Sendable {
             title: title,
             themeMode: themeMode,
             iconStyle: iconStyle,
-            gradientAngle: gradientAngle
+            gradientAngle: gradientAngle,
+            tint: tint
         )
     }
 
@@ -18621,10 +18736,11 @@ struct SetupLook: Hashable, Sendable {
         tag: 0,
         kind: .heraldic,
         name: "heraldic",
-        title: LocalizedStringResource("Heraldic"),
+        title: LocalizedStringResource("Heraldic (Full)"),
         themeMode: SpaceThemeMode.banner,
         iconStyle: SpaceIconStyle.layeredCrest,
-        gradientAngle: nil
+        gradientAngle: nil,
+        tint: nil
     )
     static let modern = SetupLook(
         tag: 1,
@@ -18633,10 +18749,21 @@ struct SetupLook: Hashable, Sendable {
         title: LocalizedStringResource("Modern"),
         themeMode: SpaceThemeMode.gradient,
         iconStyle: SpaceIconStyle.simpleSymbol,
-        gradientAngle: 90
+        gradientAngle: 90,
+        tint: nil
+    )
+    static let simple = SetupLook(
+        tag: 2,
+        kind: .simple,
+        name: "simple",
+        title: LocalizedStringResource("Simple"),
+        themeMode: SpaceThemeMode.gradient,
+        iconStyle: SpaceIconStyle.simpleSymbol,
+        gradientAngle: 0,
+        tint: 1
     )
 
-    static let all: [SetupLook] = [heraldic, modern]
+    static let all: [SetupLook] = [heraldic, modern, simple]
 
     static func named(_ name: String?) -> SetupLook? {
         all.first { $0.name == name }
@@ -18657,6 +18784,7 @@ struct SetupLook: Hashable, Sendable {
         let themeMode: SpaceThemeMode
         let iconStyle: SpaceIconStyle
         let gradientAngle: Double?
+        let tint: Double?
 
         init(
             kind: Kinds,
@@ -18664,7 +18792,8 @@ struct SetupLook: Hashable, Sendable {
             title: LocalizedStringResource,
             themeMode: SpaceThemeMode,
             iconStyle: SpaceIconStyle,
-            gradientAngle: Double?
+            gradientAngle: Double?,
+            tint: Double?
         ) {
             self.kind = kind
             self.name = name
@@ -18672,6 +18801,7 @@ struct SetupLook: Hashable, Sendable {
             self.themeMode = themeMode
             self.iconStyle = iconStyle
             self.gradientAngle = gradientAngle
+            self.tint = tint
         }
     }
 }
@@ -18857,6 +18987,7 @@ struct ShortcutCommand: Hashable, Sendable {
         case toggleSelectedTabSaved
         case blockElement
         case showBlockedElements
+        case openNextExtension
         case newFolder
     }
 
@@ -19408,8 +19539,8 @@ struct ShortcutCommand: Hashable, Sendable {
         defaultShortcuts: [
             ShortcutDefault(
                 platform: DevicePlatform.desktop,
-                keys: KeyCombination(key: "e", isSpecialKey: false, modifiers: [.command]),
-                yieldsToOverrides: false
+                keys: KeyCombination(key: "e", isSpecialKey: false, modifiers: [.command, .shift]),
+                yieldsToOverrides: true
             ),
             ShortcutDefault(
                 platform: DevicePlatform.mobile,
@@ -20964,8 +21095,32 @@ struct ShortcutCommand: Hashable, Sendable {
         isReservedFromPages: false,
         defaultPreference: ShortcutPreference.useBoth
     )
-    static let newFolder = ShortcutCommand(
+    static let openNextExtension = ShortcutCommand(
         tag: 77,
+        kind: .openNextExtension,
+        name: "openNextExtension",
+        section: ShortcutSection.page,
+        title: LocalizedStringResource("Open Next Extension"),
+        searchTerms: LocalizedStringResource("extensions popup menu cycle pinned toolbar"),
+        menuTitle: nil,
+        symbol: "puzzlepiece.extension",
+        requiredCapability: EngineCapability.extensions,
+        selects: nil,
+        number: nil,
+        defaultShortcuts: [
+            ShortcutDefault(
+                platform: DevicePlatform.desktop,
+                keys: KeyCombination(key: "e", isSpecialKey: false, modifiers: [.command]),
+                yieldsToOverrides: true
+            )
+        ],
+        paletteRest: nil,
+        offersInPalette: true,
+        isReservedFromPages: false,
+        defaultPreference: ShortcutPreference.preferWebsite
+    )
+    static let newFolder = ShortcutCommand(
+        tag: 78,
         kind: .newFolder,
         name: "newFolder",
         section: ShortcutSection.tabs,
@@ -21061,6 +21216,7 @@ struct ShortcutCommand: Hashable, Sendable {
         clearSiteCookies,
         clearSiteCache,
         toggleSelectedTabSaved,
+        openNextExtension,
         newFolder
     ]
 
@@ -21254,6 +21410,7 @@ struct ShortcutMenu: Hashable, Sendable {
                 ShortcutCommand.blockElement,
                 ShortcutCommand.showBlockedElements
             ],
+            [ShortcutCommand.openNextExtension],
             [ShortcutCommand.findInPage, ShortcutCommand.findNext, ShortcutCommand.findPrevious],
             [ShortcutCommand.zoomIn, ShortcutCommand.zoomOut, ShortcutCommand.actualSize],
             [
@@ -22299,7 +22456,7 @@ struct SpaceAccent: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -22372,7 +22529,7 @@ struct SpaceAccent: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 160,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -22445,7 +22602,7 @@ struct SpaceAccent: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -22518,7 +22675,7 @@ struct SpaceAccent: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -22761,7 +22918,7 @@ struct SpaceHouse: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -22829,7 +22986,7 @@ struct SpaceHouse: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -22897,7 +23054,7 @@ struct SpaceHouse: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -22965,7 +23122,7 @@ struct SpaceHouse: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23033,7 +23190,7 @@ struct SpaceHouse: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23101,7 +23258,7 @@ struct SpaceHouse: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23169,7 +23326,7 @@ struct SpaceHouse: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23237,7 +23394,7 @@ struct SpaceHouse: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 160,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23305,7 +23462,7 @@ struct SpaceHouse: Hashable, Sendable {
             keepsControlsReadable: true,
             themeMode: SpaceThemeMode.banner,
             gradientAngle: 0,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.layeredCrest,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23468,7 +23625,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 0,
-            showsTexture: true,
+            textureStrength: 1,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: BrandColor(red: 0.588, green: 0.588, blue: 0.588, alpha: 1),
             crest: SpaceCrest(
@@ -23525,7 +23682,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23582,7 +23739,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23639,7 +23796,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23696,7 +23853,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23753,7 +23910,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23810,7 +23967,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23867,7 +24024,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23924,7 +24081,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -23981,7 +24138,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -24038,7 +24195,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -24095,7 +24252,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -24152,7 +24309,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -24209,7 +24366,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -24266,7 +24423,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -24323,7 +24480,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -24380,7 +24537,7 @@ struct SpaceScheme: Hashable, Sendable {
             keepsControlsReadable: false,
             themeMode: SpaceThemeMode.gradient,
             gradientAngle: 90,
-            showsTexture: false,
+            textureStrength: 0,
             iconStyle: SpaceIconStyle.simpleSymbol,
             symbolColor: nil,
             crest: SpaceCrest(
@@ -26035,6 +26192,10 @@ final class FolderStateModel: ObservedModel, Identifiable {
         access(keyPath: \.orderAnchorTabID)
         return orderAnchorTabIDStorage
     }
+    var isGroup: Bool {
+        access(keyPath: \.isGroup)
+        return isGroupStorage
+    }
     var displaySymbol: String {
         access(keyPath: \.displaySymbol)
         return displaySymbolStorage
@@ -26052,6 +26213,7 @@ final class FolderStateModel: ObservedModel, Identifiable {
     @ObservationIgnored private var isCollapsedStorage: Bool
     @ObservationIgnored private var collapseModifiedAtStorage: Date?
     @ObservationIgnored private var orderAnchorTabIDStorage: UUID?
+    @ObservationIgnored private var isGroupStorage: Bool
     @ObservationIgnored private var displaySymbolStorage: String
     @ObservationIgnored private var displayColorStorage: BrandColor
 
@@ -26066,6 +26228,7 @@ final class FolderStateModel: ObservedModel, Identifiable {
             isCollapsed: isCollapsed,
             collapseModifiedAt: collapseModifiedAt,
             orderAnchorTabID: orderAnchorTabID,
+            isGroup: isGroup,
             displaySymbol: displaySymbol,
             displayColor: displayColor
         )
@@ -26081,6 +26244,7 @@ final class FolderStateModel: ObservedModel, Identifiable {
         isCollapsedStorage = value.isCollapsed
         collapseModifiedAtStorage = value.collapseModifiedAt
         orderAnchorTabIDStorage = value.orderAnchorTabID
+        isGroupStorage = value.isGroup
         displaySymbolStorage = value.displaySymbol
         displayColorStorage = value.displayColor
     }
@@ -26118,6 +26282,10 @@ final class FolderStateModel: ObservedModel, Identifiable {
         if orderAnchorTabIDStorage != value.orderAnchorTabID {
             orderAnchorTabIDStorage = value.orderAnchorTabID
             withMutation(keyPath: \.orderAnchorTabID) {}
+        }
+        if isGroupStorage != value.isGroup {
+            isGroupStorage = value.isGroup
+            withMutation(keyPath: \.isGroup) {}
         }
         if displaySymbolStorage != value.displaySymbol {
             displaySymbolStorage = value.displaySymbol

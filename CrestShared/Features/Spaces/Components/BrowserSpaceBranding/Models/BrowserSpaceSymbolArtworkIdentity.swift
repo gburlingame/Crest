@@ -24,12 +24,7 @@ struct BrowserSpaceSymbolArtworkIdentity: Equatable, Sendable {
         colorScheme: ColorScheme,
         displayScale: CGFloat
     ) {
-        #if os(macOS)
-            let drawsCrest = false
-        #else
-            let drawsCrest = branding.iconStyle == .layeredCrest
-        #endif
-        if drawsCrest {
+        if branding.iconStyle == .layeredCrest {
             var crest = branding.crest
             crest.startingPresetID = nil
             artwork = .crest(crest, colors: crest.layerColors(spaceColors: branding.colors))
