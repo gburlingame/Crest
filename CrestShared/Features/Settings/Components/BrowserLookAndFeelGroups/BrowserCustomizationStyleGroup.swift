@@ -34,7 +34,7 @@ struct BrowserCustomizationStyleGroup: View {
     }
 }
 
-/// The three styles as preview buttons in a row, each a Crest window in the
+/// The offered styles as preview buttons in a row, each a Crest window in the
 /// style's look with its Space icons, or the icons the person chose.
 struct BrowserCustomizationStyleChoices<Badge: View>: View {
     // MARK: - Variables
@@ -62,7 +62,7 @@ struct BrowserCustomizationStyleChoices<Badge: View>: View {
             ? AnyLayout(HStackLayout(alignment: .top, spacing: BrowserCustomizationStyleMetrics.spacing))
             : AnyLayout(VStackLayout(spacing: BrowserCustomizationStyleMetrics.spacing))
         layout {
-            ForEach(BrowserCustomizationStyle.all) { style in
+            ForEach(BrowserCustomizationStyle.offered) { style in
                 VStack(spacing: 4) {
                     CrestPreviewButton(
                         title: Text(style.title), isSelected: style == selection,
@@ -92,8 +92,8 @@ struct BrowserCustomizationStyleChoices<Badge: View>: View {
         .padding(.vertical, CrestSpacing.medium)
     }
 
-    /// The face given, or else the settings size, made smaller where three
-    /// would not fit across the row.
+    /// The face given, or else the settings size, made smaller where the
+    /// offered styles would not fit across the row.
     private var shownFaceSize: CGFloat {
         if let faceSize { return faceSize }
         guard axis == .horizontal else {
@@ -102,7 +102,8 @@ struct BrowserCustomizationStyleChoices<Badge: View>: View {
         let preferred =
             sizeClass == .compact ? CrestPreviewButtonMetrics.compactFace : CrestPreviewButtonMetrics.regularFace
         guard let width else { return preferred }
-        let fits = (width - 2 * BrowserCustomizationStyleMetrics.spacing) / 3
+        let count = CGFloat(BrowserCustomizationStyle.offered.count)
+        let fits = (width - (count - 1) * BrowserCustomizationStyleMetrics.spacing) / count
         return max(BrowserCustomizationStyleMetrics.smallestFace, min(preferred, fits))
     }
 }

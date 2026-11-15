@@ -38,15 +38,16 @@ final class BrowserSpaceBrandingTests: XCTestCase {
         XCTAssertEqual(restored.tabs.hoverFill, 0.5)
     }
 
-    func testCustomizationStyleStartsHeraldicAndKeepsEachChoice() throws {
+    func testCustomizationStyleStartsModernAndKeepsEachChoice() throws {
         let name = "crest-test-appearance-" + UUID().uuidString
         let defaults = try XCTUnwrap(UserDefaults(suiteName: name))
         defer { defaults.removePersistentDomain(forName: name) }
 
-        // A device whose appearance an earlier build stored has no style.
+        // A device whose appearance an earlier build stored has no style, and
+        // Thundermist on Mac starts in Modern.
         defaults.set(1.2, forKey: BrowserSidebarDensityPreference.scaleKey)
         let earlier = BrowserDeviceAppearanceStore(defaults: defaults)
-        XCTAssertEqual(earlier.customizationStyle, .heraldic)
+        XCTAssertEqual(earlier.customizationStyle, .modern)
         XCTAssertNil(earlier.chosenSpaceIcons)
         XCTAssertEqual(earlier.spaceIcons, .icons)
 

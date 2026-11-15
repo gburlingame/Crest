@@ -45,7 +45,7 @@ struct BrowserCrestForge: View {
 
     /// The style the studio shows the Space's look in.
     private var style: BrowserCustomizationStyle {
-        spaceID.map { BrowserDeviceAppearanceStore.shared.customizationStyle(for: $0) } ?? .heraldic
+        spaceID.map { BrowserDeviceAppearanceStore.shared.customizationStyle(for: $0) } ?? .standard
     }
 
     var body: some View {
@@ -112,11 +112,14 @@ struct BrowserCrestForge: View {
     }
 
     /// The whole studio, folded under Advanced beneath a simpler editor.
+    /// Thundermist on Mac offers no heraldic theming, so it has none.
     @ViewBuilder private var advancedStudio: some View {
-        BrowserAppearanceAdvancedHeader(isExpanded: $showsAdvanced)
-        if showsAdvanced {
-            studio
-        }
+        #if !os(macOS)
+            BrowserAppearanceAdvancedHeader(isExpanded: $showsAdvanced)
+            if showsAdvanced {
+                studio
+            }
+        #endif
     }
 
     /// The stage over every step, each showing what it has chosen.

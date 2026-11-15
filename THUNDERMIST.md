@@ -99,15 +99,34 @@ that does conflicts there, and keeps both.
 
 ### Only Modern and Simple on Mac
 
-Thundermist shows none of Crest's heraldic theming on Mac. Setup skips the
-choice of look and makes Modern Spaces. Its welcome page shows a plain icon in
-the Thundermist gradient, cycling through the gradients where Crest cycles
-through its templates' banners. A Space's settings read Edit Look… instead of
-Edit Crest… and leave out Artwork Credits, and the Getting Started practice
-sidebar shows plain icons. iPhone and iPad keep upstream's choices.
+Thundermist shows none of Crest's heraldic theming on Mac. Settings →
+Appearance offers only the Modern and Simple styles, Modern is the default,
+and a Space's own style can only be one of the two. A Space's editor leaves
+out the full Crest Studio that upstream folds under Advanced, with its
+banners, crests and heraldic emblems. Setup skips the choice of look and makes
+Modern Spaces. Its welcome page shows a plain icon in the Thundermist
+gradient, cycling through the gradients where Crest cycles through its
+templates' banners. A Space's settings read Edit Look… instead of Edit Crest…
+and leave out Artwork Credits, and the Getting Started practice sidebar shows
+plain icons. iPhone and iPad keep upstream's choices.
+
+A device that stored no style, as every release before the styles did, or
+stored Heraldic, moves its Spaces to their look in the style they show now on
+the first launch, then stores the styles so that happens only once. A stored
+Heraldic style, shared or a Space's own, reads as none, so the Space follows
+the default. Upstream's test that the default style is Heraldic now expects
+Modern.
 
 - Upstream files edited (core): `Device.SetupDraft.cs`, `StartSetup.cs` and
   `DevicePlatform.cs` under `CrestCore/src/CrestCore/` (setup skips the look)
+- Upstream files edited (styles):
+  `CrestShared/Features/Settings/Models/BrowserCustomizationStyle.swift`
+  (the offered styles and the default),
+  `CrestShared/Features/Settings/Components/BrowserLookAndFeelGroups/BrowserCustomizationStyleGroup.swift`
+  (the style buttons),
+  `CrestShared/Features/Spaces/Components/Forge/BrowserCrestForge.swift` (no
+  Advanced studio), `CrestMac/App/BrowserMacApplication.swift` (the one-time
+  move at launch), `CrestTests/BrowserSpaceBrandingTests.swift` (the default)
 - Upstream files edited (Mac):
   `CrestMac/Features/Onboarding/BrowserOnboardingWindow/Components/BrowserOnboardingWelcomePage/BrowserOnboardingWelcomePage.swift`,
   `CrestMac/Features/Onboarding/BrowserOnboardingWindow/Components/BrowserOnboardingWindowContent.swift`,
@@ -117,7 +136,9 @@ sidebar shows plain icons. iPhone and iPad keep upstream's choices.
   terms)
 - Upstream files edited (shared):
   `CrestShared/Features/GettingStarted/BrowserGettingStartedPracticeSidebar.swift`
-- Files added: `CrestShared/Domain/BrowserSpace/Branding/SpaceScheme+Gradients.swift`
+- Files added: `CrestShared/Domain/BrowserSpace/Branding/SpaceScheme+Gradients.swift`,
+  `CrestShared/Application/BrowserStore/BrowserStore+LeavingHeraldic.swift`,
+  `CrestTests/ThundermistStyleTests.swift`
 
 ### Opaque command palette
 

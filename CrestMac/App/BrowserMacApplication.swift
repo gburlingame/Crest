@@ -131,6 +131,8 @@ final class BrowserMacApplication {
         // The search catalog carries the engines the Spaces chose before the
         // device kept one, so it restores once the stored session is open.
         BrowserSearchCatalog.restore(into: core)
+        // Thundermist offers no Heraldic style on Mac; Spaces it left move once.
+        browser.leaveHeraldicStyle()
         BrowserAppPreferenceStore.shared.bind(
             to: browser, legacy: LegacyAppPreferences.read(for: launchEnvironment))
         BrowserAppPreferenceStore.shared.reconcileWebKitSpellChecking()

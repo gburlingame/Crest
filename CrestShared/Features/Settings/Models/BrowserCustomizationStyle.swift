@@ -31,7 +31,15 @@ struct BrowserCustomizationStyle: Hashable, Sendable, Identifiable {
         settings: [.sidebarOnRight, .appearanceMode, .defaultPageZoom, .tabScale, .sidebarSpacing, .appIcon])
 
     static let all = [heraldic, modern, simple]
-    static let standard = heraldic
+    #if os(macOS)
+        /// Thundermist on Mac offers no heraldic theming, so it starts in
+        /// Modern and offers only Modern and Simple.
+        static let offered = [modern, simple]
+        static let standard = modern
+    #else
+        static let offered = all
+        static let standard = heraldic
+    #endif
 
     // MARK: - Variables
 
@@ -61,13 +69,15 @@ struct BrowserCustomizationStyle: Hashable, Sendable, Identifiable {
 
     // MARK: - Actions - Lookup
 
+    /// The offered style stored as `name`. A style no longer offered reads as
+    /// none, so what it named falls back to the default.
     static func named(_ name: String?) -> BrowserCustomizationStyle? {
-        all.first { $0.name == name }
+        offered.first { $0.name == name }
     }
 
     /// The style of the setup look `look`.
     static func matching(_ look: SetupLook) -> BrowserCustomizationStyle {
-        all.first { $0.look == look } ?? standard
+        offered.first { $0.look == look } ?? standard
     }
 
     // MARK: - Actions - Looks
