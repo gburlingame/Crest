@@ -2091,6 +2091,16 @@ struct CredentialSaveVerdict: Equatable, Sendable {
     let validity: CredentialSaveValidity
 }
 
+struct CredentialSharers: Equatable, Sendable {
+    let spaceIDs: [UUID]
+}
+
+struct CredentialSharing: Query, Equatable, Sendable {
+    typealias Answer = CredentialSharers
+
+    let spaceID: UUID
+}
+
 struct CredentialStoredComparison: Equatable, Sendable, Identifiable {
     var id: UUID
     var passwordMatches: Bool

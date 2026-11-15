@@ -117,7 +117,7 @@ final class BrowserCredentialPageState<FillTarget> {
         guard let request = fillRequest,
             request.id == requestID,
             fillAllowed(from: .saved, into: request.passwordKind),
-            credential.descriptor.spaceID == spaceID,
+            sharesCredentials(keptBy: credential.descriptor.spaceID),
             credential.descriptor.origin == request.origin,
             let target = fillTargets[requestID]
         else {
@@ -250,6 +250,14 @@ final class BrowserCredentialPageState<FillTarget> {
     /// a field of this kind. A core that refuses fills nothing.
     private func fillAllowed(from source: CredentialFillSource, into passwordKind: CredentialPasswordKind) -> Bool {
         (try? core.query(CredentialFill(source: source, passwordKind: passwordKind)))?.isAllowed ?? false
+    }
+
+    /// Whether a password the Space `keeper` keeps may fill this page: one of
+    /// this Space's own, or one its group keeps, since a group shares its
+    /// passwords. Without the core's answer only the Space's own fill.
+    private func sharesCredentials(keptBy keeper: UUID) -> Bool {
+        keeper == spaceID
+            || (try? core.query(CredentialSharing(spaceID: spaceID)))?.spaceIDs.contains(keeper) == true
     }
 
     /// The username the core chose: the message's own, or the remembered one.

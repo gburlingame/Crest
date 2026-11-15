@@ -5229,6 +5229,10 @@
     "new-folder-from-tab-and-file-menu": {
       "category": "new",
       "message": "Right-click a tab and choose New Folder to put it in a new Saved Tabs folder, or choose File > New Folder, then type the folder's name."
+    },
+    "sub-space-password-fill": {
+      "category": "fixed",
+      "message": "Saved passwords fill on sign-in pages in Sub-Spaces, instead of failing with a message that the form changed."
     }
   }
 }

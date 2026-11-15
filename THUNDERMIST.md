@@ -203,6 +203,23 @@ in `ShortcutCatalogTests.cs`; keep both commands.
   `CrestShared/Features/Sidebar/Components/BrowserTabOrganizationMenu/Components/BrowserNewFolderMenuItem.swift`,
   `CrestMac/Features/Commands/Models/BrowserCommandActions+NewFolder.swift`
 
+### Passwords fill in Sub-Spaces
+
+A Sub-Space shares its group's session, and the group's primary keeps the
+passwords. Crest offers those passwords on a Sub-Space's sign-in pages, but its
+last check before filling accepted only a password the page's own Space keeps,
+so choosing one failed with "The form changed before Crest could fill it." The
+check now accepts a password any Space of the page's group keeps, which the core
+answers with `CredentialSharing`. A Space outside the group still fills only its
+own. Drop this entry and the fork's change if upstream fixes the check.
+
+- Upstream files edited:
+  `CrestShared/Application/Credentials/Models/BrowserCredentialPageState.swift`
+  (the fill check), and the generated contract files, which the update script
+  regenerates
+- Files added: `CrestCore/src/CrestCore/Application/Credentials/Queries/CredentialSharing.cs`,
+  `CrestCore/tests/CrestCore.Tests/Credentials/CredentialSharingTests.cs`
+
 ## No longer different
 
 - **Readable password prompts.** The fork made password prompts opaque and
