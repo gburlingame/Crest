@@ -5225,6 +5225,10 @@
     "thundermist-waterfall-icon": {
       "category": "improved",
       "message": "Thundermist has its own waterfall app icon, at golden hour in light mode and just after sunset in dark mode, in place of the choice of Crest icons."
+    },
+    "new-folder-from-tab-and-file-menu": {
+      "category": "new",
+      "message": "Right-click a tab and choose New Folder to put it in a new Saved Tabs folder, or choose File > New Folder, then type the folder's name."
     }
   }
 }

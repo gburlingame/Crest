@@ -104,10 +104,17 @@ struct BrowserTabOrganizationMenuContent: View {
             }
         }
 
+        #if os(macOS)
+            if !tab.isStartPage {
+                BrowserNewFolderMenuItem(
+                    tab: tab, browser: browser, assignment: sourceAssignment, perform: performIfCurrent)
+            }
+        #endif
+
         if !tab.placement.isDurable, !tab.isStartPage {
             Menu("Add to Current Tabs Folder", systemImage: "folder.badge.plus") {
                 Group {
-                    Button("New Folder", systemImage: "folder.badge.plus") {
+                    Button("New Current Tabs Folder", systemImage: "folder.badge.plus") {
                         performIfCurrent {
                             browser.createTabFolder([tab.id], in: assignment.spaceID)
                         }

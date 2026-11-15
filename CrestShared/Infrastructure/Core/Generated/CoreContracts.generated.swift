@@ -18215,6 +18215,7 @@ struct ShortcutCommand: Hashable, Sendable {
         case clearSiteCookies
         case clearSiteCache
         case toggleSelectedTabSaved
+        case newFolder
     }
 
     let tag: Int
@@ -20285,6 +20286,24 @@ struct ShortcutCommand: Hashable, Sendable {
         isReservedFromPages: false,
         defaultPreference: ShortcutPreference.useBoth
     )
+    static let newFolder = ShortcutCommand(
+        tag: 75,
+        kind: .newFolder,
+        name: "newFolder",
+        section: ShortcutSection.tabs,
+        title: LocalizedStringResource("New Folder"),
+        searchTerms: LocalizedStringResource("folder group organize saved tabs"),
+        menuTitle: nil,
+        symbol: "folder.badge.plus",
+        requiredCapability: nil,
+        selects: nil,
+        number: nil,
+        defaultShortcuts: [],
+        paletteRest: nil,
+        offersInPalette: true,
+        isReservedFromPages: false,
+        defaultPreference: ShortcutPreference.preferWebsite
+    )
 
     static let all: [ShortcutCommand] = [
         newWindow,
@@ -20361,7 +20380,8 @@ struct ShortcutCommand: Hashable, Sendable {
         mostRecentTabBackward,
         clearSiteCookies,
         clearSiteCache,
-        toggleSelectedTabSaved
+        toggleSelectedTabSaved,
+        newFolder
     ]
 
     static func named(_ name: String?) -> ShortcutCommand? {
@@ -20454,7 +20474,7 @@ struct ShortcutMenu: Hashable, Sendable {
                 ShortcutCommand.newQuickWindow,
                 ShortcutCommand.newPrivateWindow
             ],
-            [ShortcutCommand.openFile],
+            [ShortcutCommand.openFile, ShortcutCommand.newFolder],
             [ShortcutCommand.closeTabOrWindow, ShortcutCommand.closeWindow],
             [ShortcutCommand.printPage]
         ]

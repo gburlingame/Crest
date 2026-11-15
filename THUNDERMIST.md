@@ -173,6 +173,36 @@ progress of downloads. iPhone and iPad keep Crest's palette icons.
 - Files deleted: `CrestDockTilePlugin/CrestDockTilePlugin.swift`,
   `CrestMac/Features/Settings/BrowserPlatformAppIconSettingsSection.swift`
 
+### New Folder from a tab and the File menu
+
+Right-clicking a tab offers New Folder, which makes a folder in Saved Tabs and
+moves the tab into it; with several tabs selected it reads New Folder with N
+Tabs and moves them all. The folder goes inside the Saved Tabs folder the tabs
+already share, and at the top of Saved Tabs otherwise, so a pinned or open tab
+moves into Saved Tabs with it. File → New Folder makes an empty folder in
+Saved Tabs, as the Space's ⋯ menu does, and shows the sidebar if it was
+hidden. Either way Saved Tabs and the folders around the new one open, and its
+name is ready to type. File → New Folder has no keys by default, since every
+⌘N chord opens a window; Settings → Shortcuts can give it some. The item in
+Add to Current Tabs Folder that makes a Current Tabs folder now reads New
+Current Tabs Folder. iPhone and iPad are unchanged.
+
+The command is the last in the core's command list, and its stored name is
+`newFolder`. A merge that adds an upstream command conflicts in that list and
+in `ShortcutCatalogTests.cs`; keep both commands.
+
+- Upstream files edited:
+  `CrestCore/src/CrestCore/Contracts/Shortcuts/ShortcutCommand.cs`,
+  `CrestCore/src/CrestCore/Contracts/Shortcuts/ShortcutMenu.cs` (File menu),
+  `CrestCore/tests/CrestCore.Tests/Shortcuts/ShortcutCatalogTests.cs`,
+  `CrestMac/Features/Commands/Models/BrowserMacCommand.swift`,
+  `CrestShared/Features/Sidebar/Components/BrowserTabBatchMenu.swift`,
+  `CrestShared/Features/Sidebar/Components/BrowserTabOrganizationMenu/Components/BrowserTabOrganizationMenuContent.swift`,
+  and the generated contract files, which the update script regenerates
+- Files added: `CrestShared/Application/BrowserStore/BrowserStore+NewSavedFolder.swift`,
+  `CrestShared/Features/Sidebar/Components/BrowserTabOrganizationMenu/Components/BrowserNewFolderMenuItem.swift`,
+  `CrestMac/Features/Commands/Models/BrowserCommandActions+NewFolder.swift`
+
 ## No longer different
 
 - **Readable password prompts.** The fork made password prompts opaque and

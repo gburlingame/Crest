@@ -35,6 +35,9 @@ struct BrowserTabBatchMenu: View {
                 count == 1 ? "Pin Tab" : "Pin \(count) Tabs", systemImage: "pin", browser.filing(request, .pinned))
             action("Move to Current Tabs", systemImage: "rectangle.stack", browser.filing(request, .current))
         }
+        #if os(macOS)
+            BrowserNewFolderMenuItem(selection: request, browser: browser)
+        #endif
         Menu("Move to Folder", systemImage: "folder") {
             Group {
                 newFolderActions

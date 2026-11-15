@@ -22,6 +22,8 @@ struct BrowserMacCommand {
     static let openFile = BrowserMacCommand(
         .openFile, isAvailable: { $0.supportsEngineCapability(.localFiles) },
         run: { $0.openFile() })
+    static let newFolder = BrowserMacCommand(
+        .newFolder, isAvailable: { $0.canCreateFolder }, run: { $0.createFolder() })
     static let newQuickWindow = BrowserMacCommand(
         .newQuickWindow, withoutWindow: .opensQuickWindowBesideKeyQuickWindow, run: { $0.openQuickWindow() })
     static let newPrivateWindow = BrowserMacCommand(
@@ -154,8 +156,8 @@ struct BrowserMacCommand {
 
     /// Every command the Mac shell runs, one for each kind the core names.
     static let all = [
-        newWindow, newBlankWindow, newTab, openLocation, openFile, newQuickWindow, newPrivateWindow, closeTabOrWindow,
-        closeWindow,
+        newWindow, newBlankWindow, newTab, openLocation, openFile, newFolder, newQuickWindow, newPrivateWindow,
+        closeTabOrWindow, closeWindow,
         back, forward, reloadPage, stopLoading, reloadFromOrigin, toggleSelectedTabPinned, toggleSelectedTabSaved,
         duplicateTab,
         reopenClosedTab,

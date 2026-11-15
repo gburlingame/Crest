@@ -13,7 +13,7 @@ public sealed class ShortcutMenu {
     public static readonly ShortcutMenu File = new(name: "file", title: "File", groups: [
         [ShortcutCommand.NewWindow, ShortcutCommand.NewBlankWindow, ShortcutCommand.NewTab, ShortcutCommand.NewQuickWindow,
             ShortcutCommand.NewPrivateWindow],
-        [ShortcutCommand.OpenFile],
+        [ShortcutCommand.OpenFile, ShortcutCommand.NewFolder],
         [ShortcutCommand.CloseTabOrWindow, ShortcutCommand.CloseWindow],
         [ShortcutCommand.PrintPage]
     ]);

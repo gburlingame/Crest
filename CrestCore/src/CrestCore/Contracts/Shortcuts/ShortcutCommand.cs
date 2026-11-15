@@ -79,7 +79,8 @@ public sealed class ShortcutCommand {
         MostRecentTabBackward,
         ClearSiteCookies,
         ClearSiteCache,
-        ToggleSelectedTabSaved
+        ToggleSelectedTabSaved,
+        NewFolder
     }
 
     #endregion
@@ -308,6 +309,10 @@ public sealed class ShortcutCommand {
         name: "toggleSelectedTabSaved", ShortcutSection.Tabs, title: "Save or Unsave Current Tab", symbol: "bookmark",
         searchTerms: "saved tabs keep bookmark unsave current", menuTitle: "Save or Unsave Tab",
         availableWhen: facts => facts.ShownTab is { IsStartPage: false }, whenPageUsesKeys: ShortcutPreference.UseBoth);
+    // An empty folder in Saved Tabs. Every chord of N already opens a window, so it waits for the keys a person chooses.
+    public static readonly ShortcutCommand NewFolder = new(Kinds.NewFolder, name: "newFolder", ShortcutSection.Tabs,
+        title: "New Folder", symbol: "folder.badge.plus", searchTerms: "folder group organize saved tabs",
+        availableWhen: ShowingSpace);
 
     public static IReadOnlyList<ShortcutCommand> All { get; } = [
         NewWindow, NewBlankWindow, NewTab, NewQuickWindow, NewPrivateWindow, CloseTabOrWindow, CloseWindow, OpenLocation, Back,
@@ -319,7 +324,8 @@ public sealed class ShortcutCommand {
         ExportPDF, SaveWebArchive, PrintPage, ToggleSidebar, ShowHistory, ShowArchive, ShowDownloads, ShowWebInspector,
         SplitWithNextTab, FocusNextSplitCard, FocusPreviousSplitCard, RemoveTabFromSplit, SeparateSplitTabs,
         MoveSplitCardLeft, MoveSplitCardRight, ToggleDeveloperToolbar, ToggleTranslationToolbar, OpenFile, FindNext,
-        FindPrevious, CapturePage, MostRecentTabBackward, ClearSiteCookies, ClearSiteCache, ToggleSelectedTabSaved
+        FindPrevious, CapturePage, MostRecentTabBackward, ClearSiteCookies, ClearSiteCache, ToggleSelectedTabSaved,
+        NewFolder
     ];
 
     public Kinds Kind { get; }
