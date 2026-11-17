@@ -21,7 +21,8 @@ public sealed record CloseFolder(Guid WorkspaceId, Guid WindowId, Guid SpaceId, 
         var edited = BrowserTabCollection.Restore(space);
         var inside = edited.TabsInFolder(FolderId);
         var loaded = LoadedTabIds.ToHashSet();
-        var closing = inside.Where(loaded.Contains).Select(edited.Tab).ToArray();
+        var tabs = space.Tabs.ToDictionary(tab => tab.Id);
+        var closing = inside.Where(loaded.Contains).Select(id => tabs[id]).ToArray();
         var splits = closing.Select(tab => tab.SplitGroupId).OfType<Guid>().ToHashSet();
         var followUp = new WindowFollowUp(workspace.IssuingWindow(WindowId));
         var shown = followUp.Window?.Tab(space.Id);
@@ -30,18 +31,21 @@ public sealed record CloseFolder(Guid WorkspaceId, Guid WindowId, Guid SpaceId, 
             .Select(tab => tab.Id).ToHashSet());
         var policy = workspace.ClosePolicy(turn.Basis);
         var selected = shown;
-        var putAway = new List<SessionPagePutAway>();
+        List<SessionPagePutAway> putAways = [];
+        List<SessionSavedImage> savedImages = [];
         foreach (var tab in closing) {
             var returns = tab.Placement.IsDurable && policy == SavedTabClosePolicy.ReturnToSavedUrl
                 && (tab.SavedUrl ?? tab.Url) is not null;
+            if (returns && tab.ReturnRestoresImage)
+                savedImages.Add(new(tab.Id, TabSavedImageChange.Restore, tab.SavedFaviconUrl));
             if (tab.Placement.IsDurable) selected = edited.CloseDurable(tab.Id, selected, fallback, returns);
             else if (selected == tab.Id) selected = fallback;
-            putAway.Add(new(WindowId, space.Id, tab.Id, KeepsState: !returns));
+            putAways.Add(new(WindowId, space.Id, tab.Id, KeepsState: !returns));
         }
         edited.CollapseFolder(FolderId, true, turn.Now);
         followUp.ShowTab(space.Id, selected);
-        return new(turn.Basis.Replacing(edited.Capture(space)), SyncStaging.Creation, followUp,
-            SessionTabEvents.None with { FolderPutAways = putAway });
+        var events = SessionTabEvents.None with { PutAways = putAways, SavedImages = savedImages };
+        return new(turn.Basis.Replacing(edited.Capture(space)), SyncStaging.Creation, followUp, events);
     }
 
     #endregion

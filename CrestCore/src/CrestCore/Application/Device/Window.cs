@@ -137,33 +137,68 @@ internal sealed class Window {
     /// between, the shown one first and then the rest most recent first, up to
     /// the limit. The members of a split are one item, at the place of the
     /// member shown last, which the item focuses; a Start Page leaves out of
-    /// every item but the shown one, and a tab the Space no longer holds drops
-    /// out. A window that shows no tab in `space` has none.
-    public IReadOnlyList<RecentTabItem> RecentItems(SpaceState space) {
+    /// every item but the shown one, and so does an item none of whose pages
+    /// is among the `loaded` tabs. A tab the Space no longer holds drops out.
+    /// A window that shows no tab in `space` has none.
+    public IReadOnlyList<RecentTabItem> RecentItems(SpaceState space, IReadOnlySet<Guid> loaded) {
         ArgumentNullException.ThrowIfNull(space);
         if (Tab(space.Id) is not { } shown || !Contains(space, shown)) return [];
-        List<RecentTabItem> items = [new(Cards(space, shown).TabIds, shown)];
+        List<RecentTabItem> items = [new(space.Id, Cards(space, shown).TabIds, shown)];
         if (!recent.TryGetValue(space.Id, out var history)) return items;
         for (int index = history.Count - 1; index >= 0 && items.Count < RecentLimit; index--) {
             var tab = space.Tabs.FirstOrDefault(candidate => candidate.Id == history[index]);
             if (tab is null || tab.IsStartPage || unseen.Contains((space.Id, tab.Id))
                 || departed.Contains((space.Id, tab.Id)) || items.Any(item => item.TabIds.Contains(tab.Id))) continue;
-            items.Add(new(Cards(space, tab.Id).TabIds, tab.Id));
+            var cards = Cards(space, tab.Id).TabIds;
+            if (cards.Any(loaded.Contains)) items.Add(new(space.Id, cards, tab.Id));
         }
         return items;
     }
 
+    /// What the window switches between across `group`, the Spaces of the
+    /// shown Space's Sub-Space group, which share its profile: the shown item
+    /// first, as `RecentItems` lists it, then the loaded items of every Space
+    /// in the group, the one used most recently first, up to the limit. A
+    /// split is one item focusing its page used last; a Start Page and a tab
+    /// another window took over stay out, and a tab the group's Spaces share,
+    /// such as a pinned one, is listed once, in the shown Space when it holds
+    /// it.
+    public IReadOnlyList<RecentTabItem> GroupRecentItems(SpaceState space, IReadOnlyList<SpaceState> group,
+        IReadOnlySet<Guid> loaded) {
+        ArgumentNullException.ThrowIfNull(space);
+        var items = RecentItems(space, loaded);
+        if (items.Count == 0) return items;
+        var shown = items[0];
+        // The shown Space comes first, so an item it shares with another
+        // Space of the group keeps its place there.
+        var candidates = group.OrderBy(member => member.Id == space.Id ? 0 : 1)
+            .SelectMany(member => member.Tabs
+                .Where(tab => !tab.IsStartPage && !unseen.Contains((member.Id, tab.Id))
+                    && !departed.Contains((member.Id, tab.Id)) && !shown.TabIds.Contains(tab.Id))
+                .Select(tab => (Space: member, Tab: tab, Cards: Cards(member, tab.Id).TabIds)))
+            .Where(candidate => candidate.Cards.Any(loaded.Contains));
+        List<(RecentTabItem Item, DateTimeOffset Used)> others = [];
+        foreach (var item in candidates.GroupBy(candidate => candidate.Cards.Min())) {
+            var first = item.First();
+            var focused = item.Where(candidate => candidate.Space.Id == first.Space.Id)
+                .MaxBy(candidate => candidate.Tab.LastActivatedAt);
+            others.Add((new(first.Space.Id, first.Cards, focused.Tab.Id), focused.Tab.LastActivatedAt));
+        }
+        return [shown, .. others.OrderByDescending(other => other.Used).Take(RecentLimit - 1).Select(other => other.Item)];
+    }
+
     /// The Space's tab used last other than the shown one, as an item that
     /// focuses the page of its split used last; never a Start Page, a tab
-    /// another window took over or one whose split holds one of `elsewhere`.
-    /// Null when there is none.
-    public RecentTabItem? LastUsed(SpaceState space, IReadOnlySet<Guid> elsewhere) {
+    /// another window took over, one whose split holds one of `elsewhere`, or
+    /// one none of whose pages is among the `loaded` tabs. Null when there is
+    /// none.
+    public RecentTabItem? LastUsed(SpaceState space, IReadOnlySet<Guid> elsewhere, IReadOnlySet<Guid> loaded) {
         ArgumentNullException.ThrowIfNull(space);
         if (Tab(space.Id) is not { } shown) return null;
         var shownItem = Cards(space, shown).TabIds;
         return space.Tabs.Where(tab => !tab.IsStartPage && !shownItem.Contains(tab.Id) && !departed.Contains((space.Id, tab.Id))
-                && !Cards(space, tab.Id).TabIds.Any(elsewhere.Contains))
-            .MaxBy(tab => tab.LastActivatedAt) is { } last ? new(Cards(space, last.Id).TabIds, last.Id) : null;
+                && !Cards(space, tab.Id).TabIds.Any(elsewhere.Contains) && Cards(space, tab.Id).TabIds.Any(loaded.Contains))
+            .MaxBy(tab => tab.LastActivatedAt) is { } last ? new(space.Id, Cards(space, last.Id).TabIds, last.Id) : null;
     }
 
     /// Shows `space`, on the tab the window showed there while it still
@@ -236,15 +271,17 @@ internal sealed class Window {
         return null;
     }
 
-    /// The tab to show after the tabs of `dismissed` leave `space` together,
-    /// as a folder closing in Thundermist puts its tabs away: the latest tab
-    /// the window showed there before them that `available` still holds, or
-    /// none. The history forgets `dismissed`.
+    /// The tab to show after every one of `dismissed` leaves `space` together:
+    /// the latest tab the window showed there before them that `available`
+    /// still holds, past any it no longer does. The history forgets all of
+    /// them, and forgets everything when nothing qualifies.
     public Guid? DismissalFallback(Guid spaceId, IReadOnlySet<Guid> dismissed, IReadOnlySet<Guid> available) {
         if (!recent.TryGetValue(spaceId, out var history)) return null;
         history.RemoveAll(dismissed.Contains);
-        int latest = history.FindLastIndex(available.Contains);
-        return latest >= 0 ? history[latest] : null;
+        var latest = history.FindLastIndex(available.Contains);
+        if (latest >= 0) return history[latest];
+        history.Clear();
+        return null;
     }
 
     /// Repairs the window after `session` changed under it: a tab that is gone shows nothing, a

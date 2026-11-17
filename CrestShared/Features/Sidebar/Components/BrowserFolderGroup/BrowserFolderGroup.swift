@@ -100,6 +100,7 @@ struct BrowserFolderGroup: View {
             beginCreatingChild: beginCreatingChild,
             beginRenaming: beginRenaming,
             toggleExpansion: toggleExpansion,
+            closeAllTabs: closeAllTabs,
             beginTitleEditingIfNeeded: beginTitleEditingIfNeeded,
             commitTitle: commitTitle,
             cancelTitleEditing: cancelTitleEditing,
@@ -255,6 +256,28 @@ struct BrowserFolderGroup: View {
                 residentFolderTabIDs: keepsTabs ? configuration.residentFolderTabIDs : []
             )
             isExpanded.wrappedValue = nextExpansion
+        }
+    }
+
+    /// Closes what the folder holds to close, then closes the folder: a
+    /// saved folder's loaded tabs unload as their rows' unload control does,
+    /// and stay saved, and a group's or an open folder's tabs close together,
+    /// as a selection of them does. A folder that puts its loaded tabs away
+    /// as it closes, as in Thundermist on Mac, has none left to unload once
+    /// closed, and an open one's tabs close without it closing first, which
+    /// would ask their pages twice whether they may go.
+    private func closeAllTabs() {
+        guard configuration.isCurrentAndUnlocked, configuration.hasTabsToClose else { return }
+        let wasOpen = configuration.isShownOpen
+        let putsTabsAway = folder.kind.closesLoadedTabsWhenClosed
+        if wasOpen, folder.location.isDurable || !putsTabsAway { toggleExpansion() }
+        if folder.location.isDurable {
+            if !(wasOpen && putsTabsAway) { context.unload(configuration.loadedFolderTabIDs) }
+        } else if let request = BrowserSidebarSelection.capture(
+            configuration.folderTabIDs.map { .tab($0) }, in: context.browser)
+        {
+            _ = BrowserTabBatchActions(browser: context.browser, spaceAccess: context.spaceAccess)
+                .perform(context.browser.closing(request), for: request)
         }
     }
 

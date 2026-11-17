@@ -233,7 +233,9 @@ hidden. Either way Saved Tabs and the folders around the new one open, and its
 name is ready to type. File → New Folder has no keys by default, since every
 ⌘N chord opens a window; Settings → Shortcuts can give it some. The item in
 Add to Current Tabs Folder that makes a Current Tabs folder now reads New
-Current Tabs Folder. iPhone and iPad are unchanged.
+Current Tabs Folder. In a tab's menu New Folder follows upstream's Save Tab
+or Unsave Tab, and a merge that changes those lines keeps both. iPhone and
+iPad are unchanged.
 
 The command is the last in the core's command list, and its stored name is
 `newFolder`. A merge that adds an upstream command conflicts in that list and
@@ -271,31 +273,32 @@ own. Drop this entry and the fork's change if upstream fixes the check.
 ### Closing a folder closes its tabs
 
 Upstream closes a folder to its header plus the tabs that are loaded and the
-one the window shows. On Mac, closing a folder by its header, its chevron or
-Return closes all the way instead. Every tab inside it, nested folders
-included, that is loaded or on screen puts its page away and keeps its place.
-A saved tab goes back to its saved address when Settings says so, and an open
-tab in a Current Tabs folder is unloaded, not archived. If the window showed
-one of them, it goes back to the latest tab it showed outside the folder, or
-to none. A page that asks before leaving is asked first, and if the person
-stays, the folder stays open. Groups still close to the tab the window shows.
-A folder closed another way, such as on another device, still keeps its loaded
-tabs on screen as upstream does. iPhone and iPad are unchanged.
+one the window shows, and its header's button closes those tabs too. On Mac,
+closing a folder by its header, its chevron or Return closes all the way
+instead. Every tab inside it, nested folders included, that is loaded or on
+screen puts its page away and keeps its place. A saved tab goes back to its
+saved address when Settings says so, and an open tab in a Current Tabs folder
+is unloaded, not archived. If the window showed one of them, it goes back to
+the latest tab it showed outside the folder, or to none. A page that asks
+before leaving is asked first, and if the person stays, the folder stays open.
+Groups still close to the tab the window shows. A folder closed another way,
+such as on another device, still keeps its loaded tabs on screen as upstream
+does. iPhone and iPad are unchanged.
+
+Upstream's header button does the same on a saved folder, since closing it
+already puts its tabs away, and archives a Current Tabs folder's tabs without
+first closing it, so a page that asks before leaving is asked only once.
+Groups keep upstream's button as it is.
 
 The core's `CloseFolder` intent collapses the folder and puts the pages away in
-one edit. The window's usual fallback looks back only one tab, so
-`Window.DismissalFallback` gained a version that forgets several tabs at once
-and returns the latest one still available. `SessionTabEvents` gained
-`FolderPutAways` so one edit can put away several pages.
+one edit, as upstream's `PutAwayTabs` puts away a saved folder's tabs, using
+the same several-tab window fallback, page put-aways and saved-icon restores.
 
 - Upstream files edited:
-  `CrestCore/src/CrestCore/Application/Device/Window.cs` and
-  `CrestCore/src/CrestCore/Application/Device/WindowFollowUp.cs` (the
-  several-tab fallback),
-  `CrestCore/src/CrestCore/Application/Session/Model/SessionTabEvents.cs`,
   `CrestShared/Features/Sidebar/Models/BrowserFolderKind.swift`
   (`closesLoadedTabsWhenClosed`, true for a folder on Mac),
-  `CrestShared/Features/Sidebar/Components/BrowserFolderGroup/BrowserFolderGroup.swift`,
+  `CrestShared/Features/Sidebar/Components/BrowserFolderGroup/BrowserFolderGroup.swift`
+  (closing, and the header button),
   `CrestMac/Features/Sidebar/Components/BrowserTabSelectionMonitor.swift` and
   `CrestMac/Features/Sidebar/BrowserSidebar/Components/SpaceSidebarContent/SpaceSidebarBrowsingContent.swift`
   (Return), and the generated contract files, which the update script

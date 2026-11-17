@@ -181,6 +181,7 @@ enum Change: Equatable, Sendable {
     case tabCopied(TabCopied)
     case tabFaviconAssigned(TabFaviconAssigned)
     case tabPagePutAway(TabPagePutAway)
+    case tabSavedImageChanged(TabSavedImageChanged)
     case tabsChanged(TabsChanged)
     case tabsImported(TabsImported)
     case transientPageClosed(TransientPageClosed)
@@ -642,6 +643,7 @@ extension Change {
         case .tabCopied(let change): change.apply(to: state)
         case .tabFaviconAssigned(let change): change.apply(to: state)
         case .tabPagePutAway(let change): change.apply(to: state)
+        case .tabSavedImageChanged(let change): change.apply(to: state)
         case .tabsChanged(let change): change.apply(to: state)
         case .tabsImported(let change): change.apply(to: state)
         case .transientPageClosed(let change): change.apply(to: state)
@@ -720,6 +722,7 @@ extension Change {
         case .tabCopied(let change): change.apply(to: core, in: &batch)
         case .tabFaviconAssigned(let change): change.apply(to: core, in: &batch)
         case .tabPagePutAway(let change): change.apply(to: core, in: &batch)
+        case .tabSavedImageChanged(let change): change.apply(to: core, in: &batch)
         case .tabsChanged(let change): change.apply(to: core, in: &batch)
         case .tabsImported(let change): change.apply(to: core, in: &batch)
         case .transientPageClosed(let change): change.apply(to: core, in: &batch)
@@ -798,6 +801,7 @@ extension Change {
         case .tabCopied(let change): change.note(in: &receipts)
         case .tabFaviconAssigned(let change): change.note(in: &receipts)
         case .tabPagePutAway(let change): change.note(in: &receipts)
+        case .tabSavedImageChanged(let change): change.note(in: &receipts)
         case .tabsChanged(let change): change.note(in: &receipts)
         case .tabsImported(let change): change.note(in: &receipts)
         case .transientPageClosed(let change): change.note(in: &receipts)
@@ -1732,6 +1736,7 @@ struct CloseTab: Intent, SessionIntent, Equatable, Sendable {
     let windowID: UUID
     let spaceID: UUID
     let tabID: UUID
+    let returnTabID: UUID?
 }
 
 struct CloseTabs: Intent, SessionIntent, Equatable, Sendable {
@@ -5420,6 +5425,13 @@ struct ProtectedMediaUnavailable: EngineEvent, PageEvent, Equatable, Sendable {
     let keySystem: KeySystem
 }
 
+struct PutAwayTabs: Intent, SessionIntent, Equatable, Sendable {
+    let workspaceID: UUID
+    let windowID: UUID
+    let spaceID: UUID
+    let tabIDs: [UUID]
+}
+
 struct QuitWithDownloadsAsked: CoreChange, Equatable, Sendable {
     let promptID: UUID
     let requestID: UUID
@@ -5472,6 +5484,7 @@ struct ReassignShortcut: Intent, ShortcutIntent, Equatable, Sendable {
 }
 
 struct RecentTabItem: Equatable, Sendable {
+    let spaceID: UUID
     let tabIDs: [UUID]
     let focusedTabID: UUID
 }
@@ -7392,6 +7405,13 @@ struct TabPlacementChoice: Equatable, Sendable {
     let placement: TabPlacement
 }
 
+struct TabSavedImageChanged: CoreChange, Equatable, Sendable {
+    let workspaceID: UUID
+    let tabID: UUID
+    let change: TabSavedImageChange
+    let faviconURL: String?
+}
+
 struct TabSelection: Equatable, Sendable {
     var tabIDs: [UUID]
     var folderIDs: [UUID]
@@ -7422,6 +7442,9 @@ struct TabState: Equatable, Sendable, Identifiable {
     let customTitle: String?
     let titleModifiedAt: Date?
     let keepsPageLoaded: Bool
+    let savedTitle: String?
+    let savedFaviconURL: String?
+    let savedIconAccent: TabIconAccent?
     let iconMode: TabIconMode
     let displayTitle: String
     let isAwayFromSavedAddress: Bool
@@ -7449,6 +7472,9 @@ struct TabState: Equatable, Sendable, Identifiable {
         var customTitle: String?
         var titleModifiedAt: Date?
         var keepsPageLoaded: Bool
+        var savedTitle: String?
+        var savedFaviconURL: String?
+        var savedIconAccent: TabIconAccent?
     }
 
     /// The record's fields alone, as a platform sends it back.
@@ -7470,7 +7496,10 @@ struct TabState: Equatable, Sendable, Identifiable {
             positionModifiedAt: positionModifiedAt,
             customTitle: customTitle,
             titleModifiedAt: titleModifiedAt,
-            keepsPageLoaded: keepsPageLoaded
+            keepsPageLoaded: keepsPageLoaded,
+            savedTitle: savedTitle,
+            savedFaviconURL: savedFaviconURL,
+            savedIconAccent: savedIconAccent
         )
     }
 }
@@ -8174,6 +8203,11 @@ enum SystemTint: Int, CaseIterable, Sendable {
     case teal = 5
     case pink = 6
     case green = 7
+}
+
+enum TabSavedImageChange: Int, CaseIterable, Sendable {
+    case keep = 0
+    case restore = 1
 }
 
 enum TearOffRefusal: Int, CaseIterable, Sendable {
@@ -26707,6 +26741,18 @@ final class TabStateModel: ObservedModel, Identifiable {
         access(keyPath: \.keepsPageLoaded)
         return keepsPageLoadedStorage
     }
+    var savedTitle: String? {
+        access(keyPath: \.savedTitle)
+        return savedTitleStorage
+    }
+    var savedFaviconURL: String? {
+        access(keyPath: \.savedFaviconURL)
+        return savedFaviconURLStorage
+    }
+    var savedIconAccent: TabIconAccent? {
+        access(keyPath: \.savedIconAccent)
+        return savedIconAccentStorage
+    }
     var iconMode: TabIconMode {
         access(keyPath: \.iconMode)
         return iconModeStorage
@@ -26748,6 +26794,9 @@ final class TabStateModel: ObservedModel, Identifiable {
     @ObservationIgnored private var customTitleStorage: String?
     @ObservationIgnored private var titleModifiedAtStorage: Date?
     @ObservationIgnored private var keepsPageLoadedStorage: Bool
+    @ObservationIgnored private var savedTitleStorage: String?
+    @ObservationIgnored private var savedFaviconURLStorage: String?
+    @ObservationIgnored private var savedIconAccentStorage: TabIconAccent?
     @ObservationIgnored private var iconModeStorage: TabIconMode
     @ObservationIgnored private var displayTitleStorage: String
     @ObservationIgnored private var isAwayFromSavedAddressStorage: Bool
@@ -26774,6 +26823,9 @@ final class TabStateModel: ObservedModel, Identifiable {
             customTitle: customTitle,
             titleModifiedAt: titleModifiedAt,
             keepsPageLoaded: keepsPageLoaded,
+            savedTitle: savedTitle,
+            savedFaviconURL: savedFaviconURL,
+            savedIconAccent: savedIconAccent,
             iconMode: iconMode,
             displayTitle: displayTitle,
             isAwayFromSavedAddress: isAwayFromSavedAddress,
@@ -26801,6 +26853,9 @@ final class TabStateModel: ObservedModel, Identifiable {
         customTitleStorage = value.customTitle
         titleModifiedAtStorage = value.titleModifiedAt
         keepsPageLoadedStorage = value.keepsPageLoaded
+        savedTitleStorage = value.savedTitle
+        savedFaviconURLStorage = value.savedFaviconURL
+        savedIconAccentStorage = value.savedIconAccent
         iconModeStorage = value.iconMode
         displayTitleStorage = value.displayTitle
         isAwayFromSavedAddressStorage = value.isAwayFromSavedAddress
@@ -26874,6 +26929,18 @@ final class TabStateModel: ObservedModel, Identifiable {
         if keepsPageLoadedStorage != value.keepsPageLoaded {
             keepsPageLoadedStorage = value.keepsPageLoaded
             withMutation(keyPath: \.keepsPageLoaded) {}
+        }
+        if savedTitleStorage != value.savedTitle {
+            savedTitleStorage = value.savedTitle
+            withMutation(keyPath: \.savedTitle) {}
+        }
+        if savedFaviconURLStorage != value.savedFaviconURL {
+            savedFaviconURLStorage = value.savedFaviconURL
+            withMutation(keyPath: \.savedFaviconURL) {}
+        }
+        if savedIconAccentStorage != value.savedIconAccent {
+            savedIconAccentStorage = value.savedIconAccent
+            withMutation(keyPath: \.savedIconAccent) {}
         }
         if iconModeStorage != value.iconMode {
             iconModeStorage = value.iconMode

@@ -17,8 +17,8 @@ a persistent workspace outside the checkout, by default `~/Dev/CrestChromium`.
 They are build products, not the source of truth. Keeping the fork here lets a
 change to the engine contract and its Swift caller be reviewed together.
 
-`fork.json` defines the upstream release channel, integration branch, and
-automatic release channel: Crest follows Chrome's Stable releases for Mac.
+`fork.json` defines the upstream release channel and the integration branch:
+Crest follows the upstream Stable releases for Mac.
 `source.lock.json` pins the complete upstream recipe; `host-inputs.json` records
 the inputs and outputs of Crest's patches. A new upstream release must apply
 every existing Crest hunk without fuzz. A conflict, new toolchain requirement,
@@ -257,10 +257,11 @@ last-used engine profile, which belongs to no Space, so
 Space a link from that app routes to. A navigation throttle completes the
 request when that window's page reaches the app's callback URL and then closes
 the window; closing the window first cancels the request. Chromium's toasts,
-which anchor to a Views frame this build never creates, become Crest notices,
-and the sad-tab overlay yields to Crest's own renderer recovery. Chromium's Dock
-tile view, which draws the bundle's default icon under its download badge, is
-never installed, so the Dock keeps the icon the person picked.
+which anchor to a Views frame this build never creates, become Crest notices;
+its low-storage bubble, which anchors to the same frame, is not shown; and the
+sad-tab overlay yields to Crest's own renderer recovery. Chromium's Dock tile
+view, which draws the bundle's default icon under its download badge, is never
+installed, so the Dock keeps the icon the person picked.
 
 Site state reaches Crest through the location bar Chromium already calls.
 `CrestLocationBar::UpdateContentSettingsIcons` forwards to
@@ -622,4 +623,5 @@ subsequent user channel choices remain respected. Keep those final experimental
 feeds available so installations that update later can still make the transition.
 Development build numbers exceed every published channel and feed.
 Merging a PR into main publishes the development release from the merge commit. Chromium maintenance
-also targets main and publishes verified engine updates to Development.
+also targets main and opens upstream updates as draft PRs, whose engines a maintainer publishes
+before merging.
