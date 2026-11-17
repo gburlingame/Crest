@@ -60,14 +60,19 @@ struct BrowserFolderGroup: View {
     /// Whether the folder shows as open. Inside a closed folder that draws it
     /// as the way to its kept tabs, opening it also shows everything it holds
     /// there, and the folder stays open once the folder around it opens.
+    /// Closing a folder whose kind closes its loaded tabs puts them away.
     private var isExpanded: Binding<Bool> {
         Binding {
             configuration.isShownOpen
         } set: { isExpanded in
             guard configuration.isCurrentAndUnlocked else { return }
             if inheritedKeptTabIDs != nil { collapsedTabVisibility.openInClosedFolder(isExpanded) }
-            context.browser.setFolderCollapsed(
-                folder.id, matching: configuration.assignment, isCollapsed: !isExpanded)
+            if isExpanded || !folder.kind.closesLoadedTabsWhenClosed {
+                context.browser.setFolderCollapsed(
+                    folder.id, matching: configuration.assignment, isCollapsed: !isExpanded)
+            } else {
+                context.closeFolder(folder.id)
+            }
         }
     }
 
@@ -241,11 +246,13 @@ struct BrowserFolderGroup: View {
             CrestMotion.disclosure.unlessReducingMotion(reduceMotion)
         ) {
             let nextExpansion = !configuration.isShownOpen
+            // A folder that puts its loaded tabs away as it closes keeps none.
+            let keepsTabs = nextExpansion || !folder.kind.closesLoadedTabsWhenClosed
             collapsedTabVisibility.expansionDidChange(
                 isExpanded: nextExpansion,
-                selectedTabID: configuration.shownFolderTabID,
+                selectedTabID: keepsTabs ? configuration.shownFolderTabID : nil,
                 folderTabIDs: configuration.folderTabIDs,
-                residentFolderTabIDs: configuration.residentFolderTabIDs
+                residentFolderTabIDs: keepsTabs ? configuration.residentFolderTabIDs : []
             )
             isExpanded.wrappedValue = nextExpansion
         }

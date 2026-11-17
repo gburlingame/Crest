@@ -10,10 +10,11 @@ struct BrowserFolderKind {
     // MARK: - Static Variables
 
     /// A folder: its artwork beside its title, folders inside it, its loaded
-    /// tabs kept on screen when it closes, and a question before it goes with
-    /// everything inside it.
+    /// tabs kept on screen when it closes, or on Mac put away as it closes,
+    /// and a question before it goes with everything inside it.
     static let folder = BrowserFolderKind(
-        showsArtwork: true, holdsFolders: true, keepsLoadedTabsWhenClosed: true, asksBeforeDeleting: true,
+        showsArtwork: true, holdsFolders: true, keepsLoadedTabsWhenClosed: true,
+        closesLoadedTabsWhenClosed: closesFoldersLoadedTabs, asksBeforeDeleting: true,
         spokenName: { "\($0) folder" }, collapseHint: "Collapses this folder", expandHint: "Expands this folder",
         actionsTitle: "Folder actions", namePrompt: "Folder Name", colorTitle: "Folder Color",
         removeTitle: "Remove from Folder", renameTitle: "Rename Folder", colorMenuTitle: "Folder Color…",
@@ -26,7 +27,8 @@ struct BrowserFolderKind {
     /// tab the window shows, and gone at once when ungrouped, since its tabs
     /// stay where they are.
     static let group = BrowserFolderKind(
-        showsArtwork: false, holdsFolders: false, keepsLoadedTabsWhenClosed: false, asksBeforeDeleting: false,
+        showsArtwork: false, holdsFolders: false, keepsLoadedTabsWhenClosed: false,
+        closesLoadedTabsWhenClosed: false, asksBeforeDeleting: false,
         spokenName: { "\($0) group" }, collapseHint: "Collapses this group", expandHint: "Expands this group",
         actionsTitle: "Group actions", namePrompt: "Group Name", colorTitle: "Group Color",
         removeTitle: "Remove from Group", renameTitle: "Rename Group", colorMenuTitle: "Group Color…",
@@ -34,6 +36,13 @@ struct BrowserFolderKind {
         deleteTitle: "Ungroup", deleteSymbol: "rectangle.stack.badge.minus", deleteRole: nil,
         showsTabCounts: \.groupsShowTabCounts, showsHighlights: \.groupsAlwaysVisible,
         showsBorders: \.groupsShowBorders, tintsTitle: \.groupsTintTitle)
+
+    /// Whether a folder closes its loaded tabs here: in Thundermist on Mac.
+    #if os(macOS)
+        private static let closesFoldersLoadedTabs = true
+    #else
+        private static let closesFoldersLoadedTabs = false
+    #endif
 
     // MARK: - Variables
 
@@ -44,6 +53,11 @@ struct BrowserFolderKind {
     let holdsFolders: Bool
     /// Whether closing it keeps its loaded tabs on screen under its header.
     let keepsLoadedTabsWhenClosed: Bool
+    /// Whether the person closing it puts away the pages of its loaded tabs
+    /// and the one the window shows, so it closes all the way, as a folder
+    /// does in Thundermist on Mac. Closed another way, such as on another
+    /// device, it keeps its loaded tabs as `keepsLoadedTabsWhenClosed` says.
+    let closesLoadedTabsWhenClosed: Bool
     /// Whether deleting it asks first, since it takes what it holds along.
     let asksBeforeDeleting: Bool
     /// What VoiceOver calls the folder titled with the given name.

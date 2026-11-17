@@ -1695,6 +1695,14 @@ struct ClickPage: PageRequest, Equatable, Sendable {
     let modifiers: KeyModifiers
 }
 
+struct CloseFolder: Intent, SessionIntent, Equatable, Sendable {
+    let workspaceID: UUID
+    let windowID: UUID
+    let spaceID: UUID
+    let folderID: UUID
+    let loadedTabIDs: [UUID]
+}
+
 struct CloseInspector: PageRequest, Equatable, Sendable {
     typealias Answer = Bool
 

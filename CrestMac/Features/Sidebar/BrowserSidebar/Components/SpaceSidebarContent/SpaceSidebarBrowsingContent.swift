@@ -109,7 +109,8 @@ struct SpaceSidebarBrowsingContent: View {
             BrowserTabSelectionMonitor(
                 browser: browser, spaceAccess: spaceAccess,
                 assignment: BrowserSpaceRuntimeAssignment(space: space), activate: activate,
-                ownsFocus: browser.tabMultiSelection.isEngaged && browser.tabMultiSelection.ownsKeyboardFocus)
+                ownsFocus: browser.tabMultiSelection.isEngaged && browser.tabMultiSelection.ownsKeyboardFocus,
+                closeFolder: { _ = listContext.closeFolder($0) })
         }
         // What the core refused is information, not a decision: it shows in
         // the window's notice capsule and asks nothing of the person.

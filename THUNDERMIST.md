@@ -268,6 +268,43 @@ own. Drop this entry and the fork's change if upstream fixes the check.
 - Files added: `CrestCore/src/CrestCore/Application/Credentials/Queries/CredentialSharing.cs`,
   `CrestCore/tests/CrestCore.Tests/Credentials/CredentialSharingTests.cs`
 
+### Closing a folder closes its tabs
+
+Upstream closes a folder to its header plus the tabs that are loaded and the
+one the window shows. On Mac, closing a folder by its header, its chevron or
+Return closes all the way instead. Every tab inside it, nested folders
+included, that is loaded or on screen puts its page away and keeps its place.
+A saved tab goes back to its saved address when Settings says so, and an open
+tab in a Current Tabs folder is unloaded, not archived. If the window showed
+one of them, it goes back to the latest tab it showed outside the folder, or
+to none. A page that asks before leaving is asked first, and if the person
+stays, the folder stays open. Groups still close to the tab the window shows.
+A folder closed another way, such as on another device, still keeps its loaded
+tabs on screen as upstream does. iPhone and iPad are unchanged.
+
+The core's `CloseFolder` intent collapses the folder and puts the pages away in
+one edit. The window's usual fallback looks back only one tab, so
+`Window.DismissalFallback` gained a version that forgets several tabs at once
+and returns the latest one still available. `SessionTabEvents` gained
+`FolderPutAways` so one edit can put away several pages.
+
+- Upstream files edited:
+  `CrestCore/src/CrestCore/Application/Device/Window.cs` and
+  `CrestCore/src/CrestCore/Application/Device/WindowFollowUp.cs` (the
+  several-tab fallback),
+  `CrestCore/src/CrestCore/Application/Session/Model/SessionTabEvents.cs`,
+  `CrestShared/Features/Sidebar/Models/BrowserFolderKind.swift`
+  (`closesLoadedTabsWhenClosed`, true for a folder on Mac),
+  `CrestShared/Features/Sidebar/Components/BrowserFolderGroup/BrowserFolderGroup.swift`,
+  `CrestMac/Features/Sidebar/Components/BrowserTabSelectionMonitor.swift` and
+  `CrestMac/Features/Sidebar/BrowserSidebar/Components/SpaceSidebarContent/SpaceSidebarBrowsingContent.swift`
+  (Return), and the generated contract files, which the update script
+  regenerates
+- Files added: `CrestCore/src/CrestCore/Application/Session/Intents/Organization/CloseFolder.cs`,
+  `CrestCore/tests/CrestCore.Tests/Session/ThundermistFolderClosingTests.cs`,
+  `CrestShared/Application/BrowserStore/BrowserStore+ClosingFolders.swift`,
+  `CrestShared/Features/Sidebar/Models/BrowserSidebarListContext+ClosingFolders.swift`
+
 ## No longer different
 
 - **Readable password prompts.** The fork made password prompts opaque and

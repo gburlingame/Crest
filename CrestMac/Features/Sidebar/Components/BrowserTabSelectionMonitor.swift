@@ -9,12 +9,15 @@ struct BrowserTabSelectionMonitor: View {
     let assignment: BrowserSpaceRuntimeAssignment
     let activate: (UUID) -> Void
     var ownsFocus = false
+    /// Closes an open folder as a person closing it does, putting away the
+    /// pages of its loaded tabs where its kind does.
+    var closeFolder: ((UUID) -> Void)? = nil
 
     var body: some View {
         GeometryReader { proxy in
             Bridge(
                 browser: browser, sidebarInteraction: sidebarInteraction, spaceAccess: spaceAccess,
-                assignment: assignment, activate: activate, ownsFocus: ownsFocus,
+                assignment: assignment, activate: activate, ownsFocus: ownsFocus, closeFolder: closeFolder,
                 globalFrame: proxy.frame(in: .global))
         }
     }
@@ -26,6 +29,7 @@ struct BrowserTabSelectionMonitor: View {
         let assignment: BrowserSpaceRuntimeAssignment
         let activate: (UUID) -> Void
         let ownsFocus: Bool
+        let closeFolder: ((UUID) -> Void)?
         let globalFrame: CGRect
 
         func makeNSView(context: Context) -> SelectionView { SelectionView() }
@@ -36,6 +40,7 @@ struct BrowserTabSelectionMonitor: View {
             view.spaceAccess = spaceAccess
             view.assignment = assignment
             view.activate = activate
+            view.closeFolder = closeFolder
             view.globalFrame = globalFrame
             if ownsFocus, browser.selectedSpaceID == assignment.spaceID,
                 view.window?.attachedSheet == nil,
@@ -58,6 +63,7 @@ struct BrowserTabSelectionMonitor: View {
         weak var spaceAccess: BrowserSpaceAccessController?
         var assignment: BrowserSpaceRuntimeAssignment?
         var activate: ((UUID) -> Void)?
+        var closeFolder: ((UUID) -> Void)?
         var globalFrame: CGRect = .zero
         private var monitor: Any?
         private var windowObservers: [NSObjectProtocol] = []
@@ -236,8 +242,12 @@ struct BrowserTabSelectionMonitor: View {
                 if let folderID = id.folderID,
                     let folder = browser.shownSpace?.folders.model(folderID)
                 {
-                    browser.setFolderCollapsed(
-                        folderID, in: browser.selectedSpaceID, isCollapsed: !folder.isCollapsed)
+                    if !folder.isCollapsed, let closeFolder {
+                        closeFolder(folderID)
+                    } else {
+                        browser.setFolderCollapsed(
+                            folderID, in: browser.selectedSpaceID, isCollapsed: !folder.isCollapsed)
+                    }
                 }
                 return nil
             }

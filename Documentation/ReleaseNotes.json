@@ -5581,6 +5581,10 @@
     "mac-modern-and-simple-only": {
       "category": "improved",
       "message": "On Mac, Appearance offers the Modern and Simple styles, starting in Modern, and Spaces show their looks without crests or banners."
+    },
+    "closing-folder-closes-its-tabs": {
+      "category": "improved",
+      "message": "Closing a folder on Mac also closes the open tabs inside it, which stay in the folder, so the folder closes all the way."
     }
   }
 }

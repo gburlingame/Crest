@@ -236,6 +236,17 @@ internal sealed class Window {
         return null;
     }
 
+    /// The tab to show after the tabs of `dismissed` leave `space` together,
+    /// as a folder closing in Thundermist puts its tabs away: the latest tab
+    /// the window showed there before them that `available` still holds, or
+    /// none. The history forgets `dismissed`.
+    public Guid? DismissalFallback(Guid spaceId, IReadOnlySet<Guid> dismissed, IReadOnlySet<Guid> available) {
+        if (!recent.TryGetValue(spaceId, out var history)) return null;
+        history.RemoveAll(dismissed.Contains);
+        int latest = history.FindLastIndex(available.Contains);
+        return latest >= 0 ? history[latest] : null;
+    }
+
     /// Repairs the window after `session` changed under it: a tab that is gone shows nothing, a
     /// Space that is gone or being deleted gives way to the first remaining
     /// one on its fallback tab, split shares survive only while their group
