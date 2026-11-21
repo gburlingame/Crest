@@ -40,14 +40,19 @@ struct CrestCustomColorSwatch: View {
                         .opacity(isSelected ? 1 : 0)
                 }
                 .accessibilityHidden(true)
+                // The drawn circle takes no clicks, which on Mac it would
+                // otherwise take from the all but clear picker over it.
+                .allowsHitTesting(false)
             // The system picker sits over the circle, all but clear, so a
-            // click or tap on the circle is a click on the picker itself.
+            // click or tap on the circle is a click on the picker itself. Its
+            // well is wider than the circle, so it answers only inside it.
             ColorPicker(String(localized: title), selection: $color, supportsOpacity: false)
                 .labelsHidden()
                 .scaleEffect(1.6)
                 .opacity(0.02)
                 .frame(width: diameter, height: diameter)
                 .clipShape(Circle())
+                .contentShape(Circle())
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
         }
         .onHover { isHovering = $0 }

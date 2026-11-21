@@ -5789,6 +5789,10 @@
     "mac-collapse-all-folders-closes-tabs": {
       "category": "improved",
       "message": "On Mac, Collapse All Folders also closes the open tabs inside the folders, which stay in their folders, as closing one folder does."
+    },
+    "mac-custom-color-swatch-opens-on-click": {
+      "category": "fixed",
+      "message": "On Mac, clicking anywhere on a custom color swatch, such as a Space's icon color or the ends of a custom gradient, opens the color picker, instead of only a thin ring around it."
     }
   }
 }

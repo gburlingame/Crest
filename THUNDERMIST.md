@@ -390,6 +390,19 @@ iPhone and iPad are unchanged.
   (pass their look), `Crest.xcodeproj/project.pbxproj` (regenerated)
 - Files added: `CrestShared/Features/Spaces/Components/Forge/Styles/BrowserSpaceIconColorRow.swift`
 
+### Custom color swatches open on a click
+
+A custom color swatch, in a Space's Icon color row, Simple's custom color and
+the ends of Modern's custom gradient, lays the system color picker, all but
+clear, over the circle it draws. On Mac the drawn circle took the clicks
+meant for the picker, so only a thin ring around it opened the picker. The
+drawn circle now takes no clicks, and the picker answers only inside the
+circle, since its well is wider than the swatch. Drop this entry and the
+change if upstream fixes the swatch.
+
+- Upstream files edited:
+  `CrestShared/DesignSystem/Components/CrestSelectableCard/CrestCustomColorSwatch.swift`
+
 ## No longer different
 
 - **Readable password prompts.** The fork made password prompts opaque and
