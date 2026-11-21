@@ -25,4 +25,17 @@ extension BrowserSidebarListContext {
         if showsOne { pageAccess.selectPages() }
         return true
     }
+
+    /// Closes every open folder of the Space as the person asked, as closing
+    /// each one does, while the window shows the Space unlocked, then brings
+    /// the tab the window moves to on screen when it showed one of theirs.
+    @MainActor @discardableResult
+    func closeAllFolders() -> Bool {
+        guard tabActions.canCollapseAllFolders else { return false }
+        let loaded = browser.tabsClosingWithAllFolders(of: space) { pageAccess.containsResidentPageMatching($0) }
+        let showsOne = loaded.contains { window.shownTabIDs.contains($0) }
+        guard browser.closeAllFolders(matching: assignment, puttingAway: loaded) else { return false }
+        if showsOne { pageAccess.selectPages() }
+        return true
+    }
 }

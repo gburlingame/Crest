@@ -5785,6 +5785,10 @@
     "mac-space-icon-color": {
       "category": "new",
       "message": "On Mac, a Space's icon can wear a color of its own, chosen under Icon in the Space's look."
+    },
+    "mac-collapse-all-folders-closes-tabs": {
+      "category": "improved",
+      "message": "On Mac, Collapse All Folders also closes the open tabs inside the folders, which stay in their folders, as closing one folder does."
     }
   }
 }

@@ -325,15 +325,18 @@ own. Drop this entry and the fork's change if upstream fixes the check.
 Upstream closes a folder to its header plus the tabs that are loaded and the
 one the window shows, and its header's button closes those tabs too. On Mac,
 closing a folder by its header, its chevron or Return closes all the way
-instead. Every tab inside it, nested folders included, that is loaded or on
-screen puts its page away and keeps its place. A saved tab goes back to its
-saved address when Settings says so for saved tabs, and an open tab in a
-Current Tabs folder is unloaded, not archived. If the window showed one of them, it goes back to
-the latest tab it showed outside the folder, or to none. A page that asks
-before leaving is asked first, and if the person stays, the folder stays open.
-Groups still close to the tab the window shows. A folder closed another way,
-such as on another device or by Collapse All Folders, still keeps its loaded
-tabs on screen as upstream does. iPhone and iPad are unchanged.
+instead, and so does every open folder that Collapse All Folders closes, from
+the View menu, the command palette, the Space's menu or the sidebar's. Every
+tab inside it, nested folders included, that is loaded or on screen puts its
+page away and keeps its place. A saved tab goes back to its saved address when
+Settings says so for saved tabs, and an open tab in a Current Tabs folder is
+unloaded, not archived. If the window showed one of them, it goes back to the
+latest tab it showed outside the folder, or to none. A page that asks before
+leaving is asked first, and if the person stays, the folder stays open. Groups
+still close to the tab the window shows, and Collapse All Folders leaves them
+as they are. A folder closed another way, such as on another device, still
+keeps its loaded tabs on screen as upstream does. iPhone and iPad are
+unchanged.
 
 Upstream's header button does the same on a saved folder, since closing it
 already puts its tabs away, and archives a Current Tabs folder's tabs without
@@ -341,10 +344,12 @@ first closing it, so a page that asks before leaving is asked only once.
 Groups keep upstream's button as it is.
 
 The core's `CloseFolder` intent collapses the folder and puts the pages away in
-one edit, as upstream's `PutAwayTabs` puts away a saved folder's tabs, using
-the same several-tab window fallback, page put-aways and saved-icon restores,
-and asks each tab's section which close setting applies, as upstream's
-`ClosePolicy(basis, placement)` answers it.
+one edit, and `CloseAllFolders` does the same for every open folder upstream's
+`CollapseAllFolders` would collapse; both go through
+`NativeSessionAuthority.ClosingFolders`, as upstream's `PutAwayTabs` puts away
+a saved folder's tabs, using the same several-tab window fallback, page
+put-aways and saved-icon restores, and asks each tab's section which close
+setting applies, as upstream's `ClosePolicy(basis, placement)` answers it.
 
 - Upstream files edited:
   `CrestShared/Features/Sidebar/Models/BrowserFolderKind.swift`
@@ -353,9 +358,13 @@ and asks each tab's section which close setting applies, as upstream's
   (closing, and the header button),
   `CrestMac/Features/Sidebar/Components/BrowserTabSelectionMonitor.swift` and
   `CrestMac/Features/Sidebar/BrowserSidebar/Components/SpaceSidebarContent/SpaceSidebarBrowsingContent.swift`
-  (Return), and the generated contract files, which the update script
-  regenerates
+  (Return, and Collapse All Folders in the Space's and sidebar's menus),
+  `CrestMac/Features/Commands/Models/BrowserCommandActions.swift` (Collapse
+  All Folders in the View menu and command palette), and the generated
+  contract files, which the update script regenerates
 - Files added: `CrestCore/src/CrestCore/Application/Session/Intents/Organization/CloseFolder.cs`,
+  `CrestCore/src/CrestCore/Application/Session/Intents/Organization/CloseAllFolders.cs`,
+  `CrestCore/src/CrestCore/Application/Session/NativeSessionAuthority.ClosingFolders.cs`,
   `CrestCore/tests/CrestCore.Tests/Session/ThundermistFolderClosingTests.cs`,
   `CrestShared/Application/BrowserStore/BrowserStore+ClosingFolders.swift`,
   `CrestShared/Features/Sidebar/Models/BrowserSidebarListContext+ClosingFolders.swift`

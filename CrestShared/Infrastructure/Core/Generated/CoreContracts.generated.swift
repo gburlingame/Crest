@@ -1706,6 +1706,13 @@ struct ClickPage: PageRequest, Equatable, Sendable {
     let modifiers: KeyModifiers
 }
 
+struct CloseAllFolders: Intent, SessionIntent, Equatable, Sendable {
+    let workspaceID: UUID
+    let windowID: UUID
+    let spaceID: UUID
+    let loadedTabIDs: [UUID]
+}
+
 struct CloseFolder: Intent, SessionIntent, Equatable, Sendable {
     let workspaceID: UUID
     let windowID: UUID

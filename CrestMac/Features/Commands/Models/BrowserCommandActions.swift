@@ -473,14 +473,22 @@ struct BrowserCommandActions: BrowserNumberedSelectionPerformer {
         browser.canCollapseShownSpaceFolders(accessController: spaceAccess)
     }
 
-    /// Collapses every open folder of the Space this window shows, with the
-    /// sidebar's disclosure motion.
+    /// Closes every open folder of the Space this window shows, unless it is
+    /// locked, with the sidebar's disclosure motion, putting away the pages of
+    /// their loaded tabs as closing each folder does in Thundermist, then
+    /// brings the tab the window moves to on screen when it showed one.
     func collapseAllFolders() {
+        guard let space = browser.shownSpace, !spaceAccess.isLocked(space) else { return }
+        let pageAccess = BrowserSidebarPageAccess(pages: pages, browser: browser, spaceAccess: spaceAccess)
+        let loaded = browser.tabsClosingWithAllFolders(of: space) { pageAccess.containsResidentPageMatching($0) }
+        let showsOne = loaded.contains { browser.windowModel?.shownTabIDs.contains($0) == true }
+        var closed = false
         withAnimation(
             CrestMotion.disclosure.unlessReducingMotion(NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)
         ) {
-            _ = browser.collapseShownSpaceFolders(accessController: spaceAccess)
+            closed = browser.closeAllFolders(matching: BrowserSpaceRuntimeAssignment(space: space), puttingAway: loaded)
         }
+        if closed && showsOne { pages.select() }
     }
 
     func archiveSelectedTab() {

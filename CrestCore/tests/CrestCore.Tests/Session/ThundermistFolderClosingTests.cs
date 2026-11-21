@@ -52,4 +52,34 @@ public sealed partial class BrowserContractsTests {
             tab => Assert.Equal((TabPlacement.Current, splitWork), (tab.Placement, tab.FolderId)));
         Assert.Single(closed.SplitGroups);
     }
+
+    [Fact]
+    public void ClosingEveryFolderPutsAwayTheLoadedTabsOfEachOpenOneInOneEdit() {
+        using var device = new TestDevice(MaximalDocument());
+        var core = device.Authority;
+        TestGrants.UnlockGuarded(device.Send, device.Workspace, core.Current);
+        var space = core.Current.Spaces[0];
+        Guid Id(string value) => Guid.Parse(value);
+        Guid saved = Id("4615461C-BA47-4054-B5CF-3DCAF3362D8C"), article = Id("B61250D4-3D4E-4DD6-8871-0BB326669142"),
+            left = Id("428CAA9C-9A7A-4386-B120-F6096032C167"), right = Id("942AC076-B0D8-454B-9EEB-3791E6113F77"),
+            start = Id("056F15C0-13CE-4ED0-B9FE-DD4A9D05A56D");
+        var window = device.Open(space.Id);
+        foreach (var tab in new[] { start, saved, article, right }) device.Send(new ShowTab(window, space.Id, tab));
+
+        // Every open folder collapses, and the loaded tabs inside any of them,
+        // however deep, put their pages away and keep their places, as
+        // closing each folder would. The window skips every one of them for
+        // the loaded tab outside the folders.
+        var putAway = device.Send(new CloseAllFolders(device.Workspace, window, space.Id, [start, saved, article, left, right]))
+            .OfType<TabPagePutAway>();
+        var closed = core.Current.Spaces[0];
+        Assert.All(closed.Folders, folder => Assert.True(folder.IsCollapsed));
+        Assert.Equal(start, device.Tab(window, space.Id));
+        Assert.Equal(new HashSet<TabPagePutAway> {
+            new(device.Workspace, window, space.Id, saved, KeepsState: true),
+            new(device.Workspace, window, space.Id, article, KeepsState: false),
+            new(device.Workspace, window, space.Id, left, KeepsState: true),
+            new(device.Workspace, window, space.Id, right, KeepsState: true)}, putAway.ToHashSet());
+        Assert.Contains(closed.Tabs, tab => tab.Id == start && tab.FolderId is null);
+    }
 }
