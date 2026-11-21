@@ -6,9 +6,9 @@ namespace CrestCore.Contracts;
 /// Closes a folder as a person closes one in Thundermist on Mac: each tab of
 /// `LoadedTabIds` the folder holds, however deep, puts its page away and
 /// keeps its place, as closing a saved or pinned tab does, which returns to
-/// its saved address when the app's preferences say so, and the folder
-/// collapses. An open tab keeps what brings its page back. A window that
-/// showed one of them returns to the tab it showed before outside the folder
+/// its saved address when the app's preferences say so for its section, and
+/// the folder collapses. An open tab keeps what brings its page back. A window
+/// that showed one of them returns to the tab it showed before outside the folder
 /// and the splits it closed, whose other members would present a closed tab
 /// again, or to none, and the window that asked lets the pages go. Refused
 /// with `UnknownFolder` for a folder that is not there.
@@ -29,12 +29,11 @@ public sealed record CloseFolder(Guid WorkspaceId, Guid WindowId, Guid SpaceId, 
         var fallback = followUp.FallbackAfterDismissing(space.Id, closing.Select(tab => tab.Id).ToHashSet(), space.Tabs
             .Where(tab => !inside.Contains(tab.Id) && (tab.SplitGroupId is not { } split || !splits.Contains(split)))
             .Select(tab => tab.Id).ToHashSet());
-        var policy = workspace.ClosePolicy(turn.Basis);
         var selected = shown;
         List<SessionPagePutAway> putAways = [];
         List<SessionSavedImage> savedImages = [];
         foreach (var tab in closing) {
-            var returns = tab.Placement.IsDurable && policy == SavedTabClosePolicy.ReturnToSavedUrl
+            var returns = workspace.ClosePolicy(turn.Basis, tab.Placement) == SavedTabClosePolicy.ReturnToSavedUrl
                 && (tab.SavedUrl ?? tab.Url) is not null;
             if (returns && tab.ReturnRestoresImage)
                 savedImages.Add(new(tab.Id, TabSavedImageChange.Restore, tab.SavedFaviconUrl));
