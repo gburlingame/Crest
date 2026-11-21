@@ -64,6 +64,56 @@ straight from Xcode works.
 - Files added: `Scripts/update-thundermist.sh`,
   `Scripts/thundermist-update-reminder.sh`
 
+### A disk image for other Macs
+
+`Scripts/install-thundermist.sh --dmg` makes a Thundermist disk image that any
+Apple Silicon Mac on macOS 26.1 or later installs without Xcode: open it and
+drag Thundermist to Applications. It builds as the install does, then signs
+with the team's Developer ID instead of Apple Development, has Apple notarize
+the app and the image, and leaves `Thundermist-<version>.dmg` on the Desktop
+(`--output` picks another path). It never touches `/Applications` or a running
+Thundermist. Thundermist has no automatic updates, so each update is a new
+image.
+
+It needs three things from the team's Apple developer account, and lists any
+that are missing before it builds:
+
+- a Developer ID Application certificate. Xcode's Manage Certificates can
+  refuse it, wrongly saying only the Account Holder may make one; the
+  developer website makes it from a request saved by Certificate Assistant
+  (`/System/Library/CoreServices/Certificate Assistant.app`)
+- a Developer ID provisioning profile for `com.theburl.thundermist`; one left
+  in `~/Downloads` is copied to where Xcode keeps profiles
+- notarization credentials saved with
+  `xcrun notarytool store-credentials thundermist-notary --apple-id <Apple ID> --team-id K8SB434BHR`
+  (`THUNDERMIST_NOTARY_PROFILE` names another keychain profile)
+
+A disk image signs for iCloud's Production environment, as a Developer ID app
+must, while the development install stays on Development. The two
+environments hold separate data, so Macs sync with each other only when they
+run the same kind of build, and the container's schema has to be deployed to
+Production in the CloudKit Console before a disk image build can sync.
+
+`--dmg --development` makes an image of the development build instead,
+`Thundermist-<version>-Development.dmg`, which shares the development
+install's iCloud data. It is signed with Apple Development and not notarized,
+so it opens only on the Macs its development profile lists, and the first
+time macOS asks for Open Anyway in System Settings > Privacy & Security.
+Register each Mac's Provisioning UDID (System Information > Hardware) at
+developer.apple.com under Devices, make a macOS App Development profile for
+`com.theburl.thundermist` that lists them, and download it; the script stops
+before building when its profile lists only one Mac. It can stop opening once
+its certificate or profile expires, and a new image fixes that.
+
+Each kind of build picks only its own kind of profile, the newest one that
+grants the app, and a newer one in `~/Downloads` is copied to where Xcode keeps
+profiles. If a build stops with "Directory not empty" for a
+`crest-package-probe` folder, run it again: Chromium's crash reporter can
+outlive the packager's page check and write into its folder as it is removed.
+
+- Upstream files edited: none
+- Files changed: `Scripts/install-thundermist.sh` (added by the fork)
+
 ## Appearance and behavior
 
 ### Sidebar tab text at 14pt
