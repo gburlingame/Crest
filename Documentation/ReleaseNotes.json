@@ -5717,6 +5717,10 @@
     "closing-folder-closes-its-tabs": {
       "category": "improved",
       "message": "Closing a folder on Mac also closes the open tabs inside it, which stay in the folder, so the folder closes all the way."
+    },
+    "mac-space-icon-color": {
+      "category": "new",
+      "message": "On Mac, a Space's icon can wear a color of its own, chosen under Icon in the Space's look."
     }
   }
 }

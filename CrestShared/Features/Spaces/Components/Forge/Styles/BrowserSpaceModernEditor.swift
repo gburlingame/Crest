@@ -69,7 +69,7 @@ struct BrowserSpaceModernEditor: View {
                 BrowserSpaceGradientAngleRow(angle: angle, color: branding.secondaryColor.color)
             }
         }
-        BrowserSpaceIconSection(branding: $branding, symbol: $symbol)
+        BrowserSpaceIconSection(branding: $branding, symbol: $symbol, look: .modern)
     }
 
     private func swatch(_ preset: [BrandColor]) -> some View {

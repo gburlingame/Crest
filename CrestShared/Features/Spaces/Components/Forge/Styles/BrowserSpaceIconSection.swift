@@ -1,13 +1,20 @@
 import SwiftUI
 
-/// A Space's plain icon under its heading, as a symbol or an emoji.
+/// A Space's plain icon under its heading, as a symbol or an emoji, and on
+/// Mac the color a symbol wears, from the look `look`.
 struct BrowserSpaceIconSection: View {
     @Binding var branding: SpaceBranding
     @Binding var symbol: String
+    let look: SetupLook
 
     var body: some View {
         Section {
             BrowserSpaceIconChoice(branding: $branding, symbol: $symbol)
+            #if os(macOS)
+                if branding.iconStyle == .simpleSymbol, BrowserIconSymbol.emoji(from: symbol) == nil {
+                    BrowserSpaceIconColorRow(branding: $branding, look: look)
+                }
+            #endif
         } header: {
             CrestSettingsSectionHeading(title: "Icon")
         }

@@ -358,6 +358,27 @@ the same several-tab window fallback, page put-aways and saved-icon restores.
   `CrestShared/Application/BrowserStore/BrowserStore+ClosingFolders.swift`,
   `CrestShared/Features/Sidebar/Models/BrowserSidebarListContext+ClosingFolders.swift`
 
+### A Space's icon color
+
+Upstream colors a Space's plain icon only in the Crest Studio under Advanced,
+which Thundermist leaves out on Mac (see Only Modern and Simple on Mac). So on
+Mac the Modern and Simple editors' Icon section has an Icon color row under the
+symbol and emoji choices: a swatch that opens the system color picker. Its
+reset puts back the color the style gives the icon, the Space's own color in
+Modern and the shade of its one color in Simple. The row is hidden while the
+icon is an emoji. Choosing a new color set in Modern keeps the icon's color;
+choosing a new color in Simple gives the icon that color's shade, as upstream
+does. The color is the Space's existing `symbolColor`, so it syncs as before.
+iPhone and iPad are unchanged.
+
+- Upstream files edited:
+  `CrestShared/Features/Spaces/Components/Forge/Styles/BrowserSpaceIconSection.swift`
+  (the row, and the look it resets to),
+  `CrestShared/Features/Spaces/Components/Forge/Styles/BrowserSpaceModernEditor.swift`
+  and `CrestShared/Features/Spaces/Components/Forge/Styles/BrowserSpaceSimpleEditor.swift`
+  (pass their look), `Crest.xcodeproj/project.pbxproj` (regenerated)
+- Files added: `CrestShared/Features/Spaces/Components/Forge/Styles/BrowserSpaceIconColorRow.swift`
+
 ## No longer different
 
 - **Readable password prompts.** The fork made password prompts opaque and

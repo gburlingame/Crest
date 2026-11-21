@@ -32,6 +32,6 @@ struct BrowserSpaceSimpleEditor: View {
         } header: {
             CrestSettingsSectionHeading(title: "Color")
         }
-        BrowserSpaceIconSection(branding: $branding, symbol: $symbol)
+        BrowserSpaceIconSection(branding: $branding, symbol: $symbol, look: .simple)
     }
 }
