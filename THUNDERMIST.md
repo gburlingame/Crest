@@ -75,6 +75,18 @@ the app and the image, and leaves `Thundermist-<version>.dmg` on the Desktop
 Thundermist. Thundermist has no automatic updates, so each update is a new
 image.
 
+The image opens on one fixed window with no toolbar or sidebar: Thundermist on
+the left, Applications on the right, an arrow between them and "Drag
+Thundermist to Applications" across the top, over a dusk sky in the icon's
+afterglow colors. The image itself wears the Thundermist icon.
+`Scripts/thundermist-disk-image.py` sets the layout and
+`Scripts/thundermist-disk-image-background.swift` draws the picture; the band
+under the icons' names stays a middle tone so they read in light and dark
+mode. dmgbuild writes the layout Finder reads, from a Python environment the
+script sets up in `~/Library/Caches/Thundermist/disk-image-tools` with the
+versions pinned by hash in `Scripts/thundermist-disk-image-requirements.txt`.
+It needs `python3` 3.10 or later.
+
 It needs three things from the team's Apple developer account, and lists any
 that are missing before it builds:
 
@@ -113,6 +125,9 @@ outlive the packager's page check and write into its folder as it is removed.
 
 - Upstream files edited: none
 - Files changed: `Scripts/install-thundermist.sh` (added by the fork)
+- Files added: `Scripts/thundermist-disk-image.py`,
+  `Scripts/thundermist-disk-image-background.swift`,
+  `Scripts/thundermist-disk-image-requirements.txt`
 
 ## Appearance and behavior
 

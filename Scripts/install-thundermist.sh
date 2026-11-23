@@ -99,12 +99,31 @@ if [[ "$make_disk_image" == true ]]; then
     print -u2 "The disk image needs a .dmg path outside the repository."
     exit 64
   fi
+
+  # dmgbuild lays out the window Finder opens on the image. It lives in its own
+  # Python environment in the work root, pinned by hash in
+  # Scripts/thundermist-disk-image-requirements.txt, and is set up again when
+  # the pins or python3 change.
+  disk_image_tools="$work_root/disk-image-tools"
+  disk_image_requirements="$repository_root/Scripts/thundermist-disk-image-requirements.txt"
+  if ! python3 -c 'import sys; sys.exit(sys.version_info < (3, 10))' 2>/dev/null; then
+    print -u2 "Laying out the disk image needs Python 3.10 or newer as python3."
+    exit 1
+  fi
+  disk_image_tools_stamp="$(shasum -a 256 "$disk_image_requirements" | cut -d' ' -f1) $(python3 -c 'import sys; print(sys.executable, *sys.version_info[:3])')"
+  if [[ "$(cat "$disk_image_tools/stamp" 2>/dev/null)" != "$disk_image_tools_stamp" ]]; then
+    print "Setting up dmgbuild for the disk image's window..."
+    [[ -e "$disk_image_tools" ]] && find "$disk_image_tools" -depth -delete
+    python3 -m venv "$disk_image_tools"
+    "$disk_image_tools/bin/pip" install --quiet --disable-pip-version-check --require-hashes --only-binary :all: \
+      -r "$disk_image_requirements"
+    print -r -- "$disk_image_tools_stamp" > "$disk_image_tools/stamp"
+  fi
 fi
 
 release_root="$(mktemp -d "${TMPDIR%/}/thundermist-install.XXXXXX")"
 resolved_entitlements="$release_root/entitlements.plist"
 built_application_path="$release_root/product/Thundermist.app"
-disk_image_staging_path="$release_root/disk-image/Thundermist.app"
 provisioning_root="$release_root/provisioning"
 provisioning_application_path="$provisioning_root/build/ThundermistProvisioning.app"
 installation_staging_path="/Applications/.Thundermist-install-${$}.app"
@@ -118,8 +137,7 @@ cleanup() {
   if [[ "$installation_complete" != true && ! -e "$application_path" && -e "$previous_application_path" ]]; then
     mv "$previous_application_path" "$application_path" 2>/dev/null || true
   fi
-  for intermediate in "$built_application_path" "$previous_application_path" "$provisioning_application_path" \
-    "$disk_image_staging_path"; do
+  for intermediate in "$built_application_path" "$previous_application_path" "$provisioning_application_path"; do
     [[ -e "$intermediate" ]] && "$lsregister" -u "$intermediate" >/dev/null 2>&1 || true
   done
   find "$release_root" -depth -delete 2>/dev/null || true
@@ -402,10 +420,11 @@ if [[ "$make_disk_image" == true ]]; then
   fi
 
   disk_image="$release_root/$product_name.dmg"
-  mkdir -p "${disk_image_staging_path:h}"
-  ditto "$built_application_path" "$disk_image_staging_path"
-  ln -s /Applications "${disk_image_staging_path:h}/Applications"
-  diskutil image create from --volumeName "$product_name" --format ULFO "${disk_image_staging_path:h}" "$disk_image"
+  # hdiutil, which dmgbuild drives, warns that it is deprecated on every call.
+  "$disk_image_tools/bin/dmgbuild" -s "$repository_root/Scripts/thundermist-disk-image.py" \
+    -D application="$built_application_path" -D background="$release_root/disk-image-background.tiff" \
+    -D painter="$repository_root/Scripts/thundermist-disk-image-background.swift" \
+    "$product_name" "$disk_image" 2> >(grep -v "is deprecated" >&2)
   if [[ "$developer_id_image" == true ]]; then
     codesign --force --timestamp --sign "$signing_identity_hash" "$disk_image"
     notarize "$disk_image"
