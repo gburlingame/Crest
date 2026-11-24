@@ -96,7 +96,8 @@ final class BrowserQuickWindowModel {
     /// What the address field shows while nobody types in it: where the page
     /// is, or is heading, as the core resolves it.
     var address: String {
-        (page?.live.displayURL ?? releasedPageSnapshot?.url ?? presentedRequest.initialURL)?.absoluteString ?? ""
+        BrowserAddressPresentation.fieldText(
+            (page?.live.displayURL ?? releasedPageSnapshot?.url ?? presentedRequest.initialURL)?.absoluteString ?? "")
     }
 
     func windowTitle(for request: BrowserQuickWindowRequest) -> String {

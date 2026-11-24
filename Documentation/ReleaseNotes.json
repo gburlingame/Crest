@@ -5793,6 +5793,14 @@
     "mac-custom-color-swatch-opens-on-click": {
       "category": "fixed",
       "message": "On Mac, clicking anywhere on a custom color swatch, such as a Space's icon color or the ends of a custom gradient, opens the color picker, instead of only a thin ring around it."
+    },
+    "thundermist-engine-page-addresses": {
+      "category": "improved",
+      "message": "The engine's own pages, such as its settings, open at thundermist:// addresses and show and copy that way; crest:// addresses still open them."
+    },
+    "thundermist-chromium-settings-menu": {
+      "category": "new",
+      "message": "Thundermist > Chromium Settings… opens Chromium's own settings for the Space you're in, where Continue where you left off keeps that Space signed in after Thundermist quits."
     }
   }
 }

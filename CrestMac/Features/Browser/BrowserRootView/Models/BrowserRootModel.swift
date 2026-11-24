@@ -225,7 +225,8 @@ extension BrowserRootModel {
     /// Space's page never replaces what the field holds.
     func synchronizePageMetadata() {
         guard !isAddressEditing, !selectedSpaceIsLocked, let page = selectedPage else { return }
-        address = (page.live.displayURL ?? browser.shownTab?.address)?.absoluteString ?? ""
+        address = BrowserAddressPresentation.fieldText(
+            (page.live.displayURL ?? browser.shownTab?.address)?.absoluteString ?? "")
     }
 
 }
@@ -267,7 +268,8 @@ extension BrowserRootModel {
             pages.select()
             guard pages.navigate(to: input) else { return }
         }
-        address = (selectedPage?.live.displayURL ?? browser.shownTab?.address)?.absoluteString ?? input
+        address = BrowserAddressPresentation.fieldText(
+            (selectedPage?.live.displayURL ?? browser.shownTab?.address)?.absoluteString ?? input)
         isAddressEditing = false
         AddressFocusAction.resign()
     }
@@ -634,7 +636,7 @@ extension BrowserRootModel {
             didSelectTab: { [weak self] in
                 guard let self else { return }
                 self.pages.select()
-                self.address = self.browser.shownTab?.url ?? ""
+                self.address = BrowserAddressPresentation.fieldText(self.browser.shownTab?.url ?? "")
             }
         )
     }

@@ -167,7 +167,7 @@ struct BrowserPageCardBar: View {
 
     /// The page's address, or the tab's while it has no page.
     private var address: String {
-        page?.live.displayURL?.absoluteString ?? tab?.url ?? ""
+        BrowserAddressPresentation.fieldText(page?.live.displayURL?.absoluteString ?? tab?.url ?? "")
     }
 
     // MARK: - Actions - Address

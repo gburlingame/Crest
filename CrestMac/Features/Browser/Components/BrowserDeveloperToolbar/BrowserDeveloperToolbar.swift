@@ -99,7 +99,7 @@ struct BrowserDeveloperToolbar: View {
     }
 
     private func synchronizeAddress() {
-        address = page.live.displayURL?.absoluteString ?? ""
+        address = BrowserAddressPresentation.fieldText(page.live.displayURL?.absoluteString ?? "")
     }
 
     /// Loads what the person typed, which the core resolves by the Space's

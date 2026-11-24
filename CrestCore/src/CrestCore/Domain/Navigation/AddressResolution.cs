@@ -18,6 +18,10 @@ public sealed record AddressResolution(string Url, string? SearchQuery, string? 
     public const string ChromePrefix = ChromeScheme + "://";
     public const string CrestPrefix = CrestScheme + "://";
     public const string ChromeExtensionPrefix = ChromeExtensionScheme + "://";
+    // Thundermist's spelling of the engine's own pages, which the core holds
+    // as `crest://` addresses: it shows them so and reads them back when typed.
+    public const string ThundermistScheme = "thundermist";
+    public const string ThundermistPrefix = ThundermistScheme + "://";
 
     /// The endings of names reserved for one device or one local network:
     /// loopback, multicast DNS, home networks and private use, and the one
@@ -62,7 +66,7 @@ public sealed record AddressResolution(string Url, string? SearchQuery, string? 
     /// engine that shows none can't load.
     public static string? Held(string url, bool allowsInternalPages) {
         ArgumentNullException.ThrowIfNull(url);
-        string value = url.Trim();
+        string value = EngineSpelling(url.Trim());
         if (IsInternalPage(value)) return allowsInternalPages ? value : null;
         return Uri.TryCreate(value, UriKind.Absolute, out var parsed)
             && UrlScheme.DispositionOf(parsed.Scheme, isAppInitiated: true) == ExternalSchemeDisposition.Engine
@@ -76,10 +80,11 @@ public sealed record AddressResolution(string Url, string? SearchQuery, string? 
         string value = input.Trim();
         if (value.Length == 0) return null;
         if (value.Length > 4096) throw new Rejected(new UnsupportedAddress(value));
-        if (value == AboutBlank || IsInternalPage(value)) {
+        string enginePage = EngineSpelling(value);
+        if (value == AboutBlank || IsInternalPage(enginePage)) {
             if (!allowsInternalPages) return new(provider.Search(value), value);
-            ValidateUrl(value, allowsInternalPages: true);
-            return new(value, null);
+            ValidateUrl(enginePage, allowsInternalPages: true);
+            return new(enginePage, null);
         }
         if (Uri.TryCreate(value, UriKind.Absolute, out var explicitUrl) && WebScheme.Named(explicitUrl.Scheme) is not null
             && explicitUrl.Host.Length > 0) return new(value, null);
@@ -148,6 +153,24 @@ public sealed record AddressResolution(string Url, string? SearchQuery, string? 
         if (!parsed.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)) return null;
         return new UriBuilder(parsed) { Host = string.Empty }.Uri.AbsoluteUri;
     }
+
+    #endregion
+
+    #region Actions - Presentation
+
+    /// `url` as Thundermist shows it: an engine page in Thundermist's own
+    /// `thundermist://` spelling, and any other address as it is.
+    public static string Presented(string url) {
+        ArgumentNullException.ThrowIfNull(url);
+        return url.StartsWith(CrestPrefix, StringComparison.OrdinalIgnoreCase)
+            ? ThundermistPrefix + url[CrestPrefix.Length..] : url;
+    }
+
+    /// `value` as the engine knows it: an engine page spelt `thundermist://`
+    /// as the `crest://` address it names, and anything else as it is.
+    private static string EngineSpelling(string value) =>
+        value.StartsWith(ThundermistPrefix, StringComparison.OrdinalIgnoreCase)
+            ? CrestPrefix + value[ThundermistPrefix.Length..] : value;
 
     #endregion
 

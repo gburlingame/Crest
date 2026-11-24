@@ -418,6 +418,43 @@ change if upstream fixes the swatch.
 - Upstream files edited:
   `CrestShared/DesignSystem/Components/CrestSelectableCard/CrestCustomColorSwatch.swift`
 
+### thundermist:// addresses for the engine's own pages
+
+Chromium's own pages, which Crest shows at `crest://` addresses in place of
+`chrome://`, show as `thundermist://` addresses: `thundermist://settings`,
+`thundermist://extensions` and the rest. Typing either spelling opens the
+page. The core and the prebuilt engine still hold these pages as `crest://`
+addresses, so stored tabs, history and sync keep that spelling; only what
+Thundermist shows, takes from typing and copies changes. Chromium's own
+settings page, `thundermist://settings/onStartup`, is where "Continue where
+you left off" is turned on, Space by Space, which also keeps a Space's
+session cookies when Thundermist quits. Thundermist > Chromium Settings…
+opens that page in a new tab of the Space in front; the item is hidden while
+new pages open on an engine without pages of its own.
+
+The core reads a typed `thundermist://` address as the `crest://` page it
+names, in `AddressResolution`, and Copy URL gives `thundermist://` through
+`LinkToCopy`. Each address field on Mac shows the spelling through
+`BrowserAddressPresentation.fieldText`. The menu item is a
+`BrowserMacApplicationAction`, which gained `offeredFor`, the feature the
+default engine must support for an action to show.
+
+- Upstream files edited: `CrestCore/src/CrestCore/Domain/Navigation/AddressResolution.cs`,
+  `CrestCore/src/CrestCore/Application/Device/Queries/LinkToCopy.cs`,
+  `CrestMac/App/Shell/BrowserMacApplicationAction.swift`,
+  `CrestMac/App/Shell/BrowserMacMenuBar.swift`,
+  `CrestMac/Features/Browser/BrowserRootView/Models/BrowserRootModel.swift`,
+  `CrestMac/Features/Browser/Components/BrowserDeveloperToolbar/BrowserDeveloperToolbar.swift`,
+  `CrestMac/Features/PageBar/BrowserPageCardBar.swift`,
+  `CrestMac/Features/PageBar/Components/BrowserPageCardAddressField.swift`,
+  `CrestMac/Features/QuickWindow/BrowserQuickWindowView/Models/BrowserQuickWindowModel.swift`,
+  `CrestMac/Features/QuickWindow/BrowserQuickWindowView/Components/BrowserQuickWindowUnlockedContent/Components/BrowserQuickWindowPageObservationModifier.swift`,
+  `Crest.xcodeproj/project.pbxproj` (regenerated)
+- Files added:
+  `CrestShared/Features/Chrome/BrowserAddressContent/Models/BrowserAddressPresentation+EnginePages.swift`,
+  `CrestMac/App/Shell/BrowserMacShell+EngineSettings.swift`,
+  `CrestCore/tests/CrestCore.Tests/Domain/ThundermistAddressTests.cs`
+
 ## No longer different
 
 - **Readable password prompts.** The fork made password prompts opaque and

@@ -9,7 +9,7 @@ struct BrowserQuickWindowPageObservationModifier: ViewModifier {
         content
             .onChange(of: model.page?.live.documentURL) { _, url in
                 guard let url else { return }
-                addressText = url.absoluteString
+                addressText = BrowserAddressPresentation.fieldText(url.absoluteString)
                 model.updatePresentedURL(url)
             }
             // An address typed and then dismissed gives the field back to

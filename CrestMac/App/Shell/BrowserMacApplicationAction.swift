@@ -14,6 +14,12 @@ struct BrowserMacApplicationAction: Hashable {
     static let settings = BrowserMacApplicationAction(
         name: "settings", title: "Settings…", symbol: "gearshape", keyEquivalent: ","
     ) { $0.openSettings() }
+    /// Thundermist: the engine's own settings for the Space in front, at their
+    /// On startup section, offered while new pages open on an engine that
+    /// shows its own pages.
+    static let engineSettings = BrowserMacApplicationAction(
+        name: "engine-settings", title: "Chromium Settings…", symbol: "gearshape.2",
+        offeredFor: .internalPages, perform: { $0.openEngineSettings() })
     /// Ends every agent's connection and keeps agents out of the tabs they
     /// used until Crest quits, while any agent is connected.
     static let stopAllAgents = BrowserMacApplicationAction(
@@ -29,7 +35,7 @@ struct BrowserMacApplicationAction: Hashable {
         isEnabled: { $0.pageActions?.canPerform(.toggleTranslationToolbar) == true },
         perform: { $0.pageActions?.translatePage() })
     static let all: [BrowserMacApplicationAction] = [
-        about, updates, settings, stopAllAgents, gettingStarted, translatePage,
+        about, updates, settings, engineSettings, stopAllAgents, gettingStarted, translatePage,
     ]
 
     // MARK: - Variables
@@ -44,6 +50,9 @@ struct BrowserMacApplicationAction: Hashable {
     /// The shortcut command the device must offer for the menu to show the
     /// action, or nil when it always shows.
     let offeredWith: ShortcutCommand?
+    /// The feature the engine new pages open on must support for the menu to
+    /// show the action, or nil when it needs none.
+    let offeredFor: EngineCapability?
     private let availability: @MainActor (BrowserMacShell) -> Bool
     private let run: @MainActor (BrowserMacShell) -> Void
 
@@ -51,7 +60,8 @@ struct BrowserMacApplicationAction: Hashable {
 
     private init(
         name: String, title: LocalizedStringResource, symbol: String? = nil, keyEquivalent: String = "",
-        offeredWith: ShortcutCommand? = nil, isEnabled: @escaping @MainActor (BrowserMacShell) -> Bool = { _ in true },
+        offeredWith: ShortcutCommand? = nil, offeredFor: EngineCapability? = nil,
+        isEnabled: @escaping @MainActor (BrowserMacShell) -> Bool = { _ in true },
         perform: @escaping @MainActor (BrowserMacShell) -> Void
     ) {
         self.name = name
@@ -59,6 +69,7 @@ struct BrowserMacApplicationAction: Hashable {
         self.symbol = symbol
         self.keyEquivalent = keyEquivalent
         self.offeredWith = offeredWith
+        self.offeredFor = offeredFor
         availability = isEnabled
         run = perform
     }
@@ -67,7 +78,7 @@ struct BrowserMacApplicationAction: Hashable {
 
     /// Whether the menu shows the action, as the read model `state` says.
     func isOffered(in state: CoreState) -> Bool {
-        offeredWith?.isOffered(in: state) ?? true
+        (offeredWith?.isOffered(in: state) ?? true) && (offeredFor.map(state.defaultEngineSupports) ?? true)
     }
 
     /// Whether `shell` can run the action now.
